@@ -1,0 +1,10 @@
+[[language]]
+name = "python"
+scope = "source.python"
+language-server = { command = "ruff-lsp" }
+config = { settings = { args = [] } }
+auto-format = true
+
+[language.formatter]
+command = "black"
+args = ["--quiet", "-"]
