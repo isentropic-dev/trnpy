@@ -19,6 +19,14 @@ class Simulation:
         for Windows, `libtrnsys.so` for Linux) must also contain the required
         TRNSYS resource files (`Units.lab`, `Descrips.dat`, etc.).
 
+        Usage example:
+            sim = trnsys.Simulation("path/to/trnsys.dll", "path/to/example.dck")
+            done = False
+            while not done:
+                done = sim.stepForward()
+                value = sim.getOutputValue(7, 1)
+                print(f"Current value for output 1 of unit 7 is {value}")
+
         Args:
             trnsys_lib: Path to the compiled TRNSYS library.
             input_file: Path to the simulation's input (deck) file.
