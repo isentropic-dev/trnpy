@@ -112,8 +112,8 @@ class Simulation:
         """Return the output value of a unit.
 
         Args:
-            unit_number: The unit of interest
-            output_number: The output of interest
+            unit_number: The unit of interest.
+            output_number: The output of interest.
 
         Raises:
             UnitNotFoundError: If `unit_number` is not present in the simulation.
