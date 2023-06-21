@@ -95,7 +95,7 @@ class Simulation:
 
         Raises:
             ValueError: If `steps` is less than `1`.
-            RuntimeError: If simulation has reached its final time.
+            RuntimeError: If called after simulation has reached its final time.
             SimulationError: If TRNSYS reported a fatal error during a step.
         """
         if steps < 1:
