@@ -4,9 +4,20 @@ import os
 import ctypes as ct
 from pathlib import Path
 
+from .exceptions import (
+    DuplicateLibraryError,
+    SimulationError,
+    UnitNotFoundError,
+    InvalidUnitOutputError,
+)
+
 # Only one `Simulation` instance can be created for each TRNSYS library file,
 # so we need to keep track of which files have been loaded.
 _loaded_trnsys_libs = set()
+
+
+class TrnsysLib:
+    """Represents a TRNSYS dynamic library loaded in memory."""
 
 
 class Simulation:
@@ -132,17 +143,5 @@ class Simulation:
         if error.value == 1:
             raise UnitNotFoundError
         if error.value == 2:
-            raise ValueError
+            raise InvalidUnitOutputError
         return value
-
-
-class DuplicateLibraryError(Exception):
-    """Exception raised when a TRNSYS library file has already been loaded."""
-
-
-class SimulationError(Exception):
-    """Exception raised when TRNSYS reports a fatal error."""
-
-
-class UnitNotFoundError(Exception):
-    """Exception raised when a unit is not present in a simulation."""
