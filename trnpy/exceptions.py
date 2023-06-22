@@ -12,7 +12,7 @@ class TrnsysError(Exception):
     def __init__(self, messages: dict, error_code: int):
         message = messages.get(
             error_code,
-            "An unknown TRNSYS error ({error_code}) occurred.",
+            f"An unknown TRNSYS error ({error_code}) occurred.",
         )
         super().__init__(message)
         self.error_code = error_code
