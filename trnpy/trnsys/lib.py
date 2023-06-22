@@ -41,7 +41,7 @@ class TrnsysLib:
     that is responsible for loading and wrapping a TRNSYS library file.
     """
 
-    def setDirectories(self, dirs: TrnsysDirectories) -> int:
+    def set_directories(self, dirs: TrnsysDirectories) -> int:
         """Set the TRNSYS directories.
 
         Args:
@@ -53,7 +53,7 @@ class TrnsysLib:
         """
         raise NotImplementedError
 
-    def loadInputFile(self, input_file: Path) -> int:
+    def load_input_file(self, input_file: Path) -> int:
         """Load an input file.
 
         Args:
@@ -65,7 +65,7 @@ class TrnsysLib:
         """
         raise NotImplementedError
 
-    def stepForward(self, steps: int) -> (bool, int):
+    def step_forward(self, steps: int) -> (bool, int):
         """Step the simulation forward.
 
         Args:
@@ -81,7 +81,7 @@ class TrnsysLib:
         """
         raise NotImplementedError
 
-    def getOutputValue(self, unit: int, output_number: int) -> (float, int):
+    def get_output_value(self, unit: int, output_number: int) -> (float, int):
         """Return the output value of a unit.
 
         Args:
@@ -135,10 +135,10 @@ class LoadedTrnsysLib(TrnsysLib):
             ct.POINTER(ct.c_int),  # error code (by reference)
         ]
 
-    def setDirectories(self, dirs: TrnsysDirectories) -> int:
+    def set_directories(self, dirs: TrnsysDirectories) -> int:
         """Set the TRNSYS directories in the library.
 
-        Refer to the documentation of `TrnsysLib.setDirectories` for more details.
+        Refer to the documentation of `TrnsysLib.set_directories` for more details.
         """
         error = ct.c_int(0)
         self.lib.apiSetDirectories(
@@ -149,28 +149,28 @@ class LoadedTrnsysLib(TrnsysLib):
         )
         return error.value
 
-    def loadInputFile(self, input_file: Path) -> int:
+    def load_input_file(self, input_file: Path) -> int:
         """Load an input file.
 
-        Refer to the documentation of `TrnsysLib.loadInputFile` for more details.
+        Refer to the documentation of `TrnsysLib.load_input_file` for more details.
         """
         error = ct.c_int(0)
         self.lib.apiLoadInputFile(str(input_file).encode(), error)
         return error.value
 
-    def stepForward(self, steps: int) -> (bool, int):
+    def step_forward(self, steps: int) -> (bool, int):
         """Step the simulation forward.
 
-        Refer to the documentation of `TrnsysLib.stepForward` for more details.
+        Refer to the documentation of `TrnsysLib.step_forward` for more details.
         """
         error = ct.c_int(0)
         done = self.lib.apiStepForward(steps, error)
         return (done, error.value)
 
-    def getOutputValue(self, unit: int, output_number: int) -> (float, int):
+    def get_output_value(self, unit: int, output_number: int) -> (float, int):
         """Return the output value of a unit.
 
-        Refer to the documentation of `TrnsysLib.getOutputValue` for more details.
+        Refer to the documentation of `TrnsysLib.get_output_value` for more details.
         """
         error = ct.c_int(0)
         value = self.lib.apiGetOutputValue(unit, output_number, error)
