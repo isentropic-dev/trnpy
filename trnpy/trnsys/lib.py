@@ -148,6 +148,12 @@ class LoadedTrnsysLib(TrnsysLib):
             ct.c_int,  # output number
             ct.POINTER(ct.c_int),  # error code (by reference)
         ]
+        self.lib.apiSetInputValue.argtypes = [
+            ct.c_int,  # unit number
+            ct.c_int,  # input number
+            ct.c_double,  # value to set
+            ct.POINTER(ct.c_int),  # error code (by reference)
+        ]
 
     def set_directories(self, dirs: TrnsysDirectories) -> int:
         """Set the TRNSYS directories in the library.
