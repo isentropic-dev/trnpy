@@ -9,6 +9,7 @@ from ..exceptions import (
     TrnsysLoadInputFileError,
     TrnsysStepForwardError,
     TrnsysGetOutputValueError,
+    TrnsysSetInputValueError,
 )
 
 
@@ -117,3 +118,18 @@ class Simulation:
             raise TrnsysGetOutputValueError(error_code)
 
         return value
+
+    def set_input_value(self, *, unit: int, input_number: int, value: float):
+        """Set an input value for a unit.
+
+        Args:
+            unit: The unit of interest.
+            input_number: The input of interest.
+            value (float): The input is set to this value.
+
+        Raises:
+            TrnsysSetInputValueError
+        """
+        error_code = self.lib.set_input_value(unit, input_number, value)
+        if error_code:
+            raise TrnsysSetInputValueError(error_code)

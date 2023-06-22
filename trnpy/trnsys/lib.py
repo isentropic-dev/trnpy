@@ -96,6 +96,20 @@ class TrnsysLib:
         """
         raise NotImplementedError
 
+    def set_input_value(self, unit: int, input_number: int, value: float) -> int:
+        """Set an input value for a unit.
+
+        Args:
+            unit (int): The unit of interest.
+            input_number (int): The input of interest.
+            value (float): The input is set to this value.
+
+        Returns:
+            int: The error code reported by TRNSYS.
+                 A value of 0 indicates a successful call.
+        """
+        raise NotImplementedError
+
 
 class LoadedTrnsysLib(TrnsysLib):
     """Represents a TRNSYS library loaded in memory."""
@@ -175,3 +189,12 @@ class LoadedTrnsysLib(TrnsysLib):
         error = ct.c_int(0)
         value = self.lib.apiGetOutputValue(unit, output_number, error)
         return (value, error.value)
+
+    def set_input_value(self, unit: int, input_number: int, value: float) -> int:
+        """Set an input value for a unit.
+
+        Refer to the documentation of `TrnsysLib.set_input_value` for more details.
+        """
+        error = ct.c_int(0)
+        self.lib.apiSetInputValue(unit, input_number, value, error)
+        return error.value

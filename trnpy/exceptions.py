@@ -57,3 +57,12 @@ class TrnsysGetOutputValueError(TrnsysError):
             2: "output number is not valid for this unit",
         }
         super().__init__(messages, error_code)
+
+
+class TrnsysSetInputValueError(TrnsysError):
+    def __init__(self, error_code: int):
+        messages = {
+            1: "unit is not present in the deck",
+            2: "input number is not valid for this unit",
+        }
+        super().__init__(messages, error_code)
