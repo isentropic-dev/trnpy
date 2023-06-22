@@ -60,11 +60,11 @@ class Simulation:
 
     def __init__(self, lib: TrnsysLib, dirs: TrnsysDirectories, input_file: Path):
         """Initialize a Simulation object."""
-        error_code = lib.setDirectories(dirs)
+        error_code = lib.set_directories(dirs)
         if error_code:
             raise TrnsysSetDirectoriesError(error_code)
 
-        error_code = lib.loadInputFile(input_file)
+        error_code = lib.load_input_file(input_file)
         if error_code:
             raise TrnsysLoadInputFileError(error_code)
 
@@ -93,7 +93,7 @@ class Simulation:
         if steps < 1:
             raise ValueError("Number of steps cannot be less than 1.")
 
-        (done, error_code) = self.lib.stepForward(steps)
+        (done, error_code) = self.lib.step_forward(steps)
         if error_code:
             raise TrnsysStepForwardError(error_code)
 
@@ -112,9 +112,7 @@ class Simulation:
         Raises:
             TrnsysGetOutputValueError
         """
-        (value, error_code) = self.lib.getOutputValue(
-            unit=unit, output_number=output_number
-        )
+        (value, error_code) = self.lib.get_output_value(unit, output_number)
         if error_code:
             raise TrnsysGetOutputValueError(error_code)
 

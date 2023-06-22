@@ -12,13 +12,13 @@ class MockTrnsysLib(TrnsysLib):
     def __init__(self):
         self.is_at_end = False
 
-    def setDirectories(self, dirs: TrnsysDirectories) -> int:
+    def set_directories(self, dirs: TrnsysDirectories) -> int:
         return 0
 
-    def loadInputFile(self, input_file: Path) -> int:
+    def load_input_file(self, input_file: Path) -> int:
         return 0
 
-    def stepForward(self, steps: int) -> (bool, int):
+    def step_forward(self, steps: int) -> (bool, int):
         if self.is_at_end:
             return (False, 1)
         return (True, 0)
