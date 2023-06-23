@@ -5,6 +5,8 @@ import functools
 from collections import namedtuple
 from dataclasses import dataclass
 from pathlib import Path
+from typing import NamedTuple
+
 
 from ..exceptions import DuplicateLibraryError
 
@@ -20,21 +22,28 @@ class TrnsysDirectories:
     user_lib: Path
 
 
-StepForwardReturn = namedtuple("StepForwardReturn", ["done", "error"])
-StepForwardReturn.__doc__ = """The return value of `TrnsysLib.step_forward`.
+class StepForwardReturn(NamedTuple):
+    """The return value of `TrnsysLib.step_forward`.
 
-Attributes:
-    done (bool): True if the simulation has reached its final time.
-    error (int): The error code reported by TRNSYS, with 0 indicating a successful call.
-"""
+    Attributes:
+        done (bool): True if the simulation has reached its final time.
+        error (int): Error code reported by TRNSYS, with 0 indicating a successful call.
+    """
 
-GetOutputValueReturn = namedtuple("OutputValue", ["value", "error"])
-GetOutputValueReturn.__doc__ = """The return value of `TrnsysLib.get_output_value`.
+    done: bool
+    error: int
 
-Attributes:
-    value (float): The output value reported by TRNSYS.
-    error (int): The error code reported by TRNSYS, with 0 indicating a successful call.
-"""
+
+class GetOutputValueReturn(NamedTuple):
+    """The return value of `TrnsysLib.get_output_value`.
+
+    Attributes:
+        value (float): The output value reported by TRNSYS.
+        error (int): Error code reported by TRNSYS, with 0 indicating a successful call.
+    """
+
+    value: float
+    error: int
 
 
 def _track_lib_path(lib_path: Path, tracked_paths: set):
