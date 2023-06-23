@@ -21,11 +21,45 @@ from trnpy.exceptions import (
 
 
 class MockTrnsysLib(TrnsysLib):
-    def __init__(self):
-        self.is_at_end = False
-        self.units = set()  # tracks units we want to be present in the deck
-        self.unit_inputs = {}  # keyed by str f"{unit}:{input_number}"
-        self.unit_outputs = {}  # keyed by str f"{unit}:{output_number}"
+    def __init__(
+        self,
+        *,
+        start_time: float = 0,
+        final_time: float = 10,
+        time_step: float = 1,
+        current_time: float = 0,
+        units: dict = {},
+    ):
+        """Create a new mocked TRNSYS library.
+
+        Args:
+            start_time (float, optional): The simulation start time.  Defaults to 0.
+            final_time (float, optional): The simulation final time.  Defaults to 10.
+            time_step (float, optional): The simulation time step.  Defaults to 1.
+            current_time (float, optional): The current simulation time.  Defaults to 0.
+            units (dict, optional): The assumed state of any units in the
+                simualation, keyed by unit number.  Each unit is represented as
+                a dict with any of the following keys, each of which map to a
+                list of floats for that item:
+                    - "parameters" (list of floats): Current parameter values.
+                    - "inputs" (list of floats): Current input values.
+                    - "outputs" (list of floats): Current output values.
+                    - "derivatives" (list of floats): Current derivative values.
+        """
+        self._start_time = start_time
+        self._final_time = final_time
+        self._time_step = time_step
+        self._current_time = current_time
+        self._units = units
+
+    def _is_at_final_time(self):
+        """Check if simulation is at final time.
+
+        Because of possible accumulating floating point error, we should not
+        directly compare `self.current_time` to `self.final_time`.  Instead, we
+        check if the current time is within half a time step of the final time.
+        """
+        return abs(self._final_time - self._current_time) < 0.5 * self._time_step
 
     def set_directories(self, dirs: TrnsysDirectories) -> int:
         return 0
@@ -34,49 +68,39 @@ class MockTrnsysLib(TrnsysLib):
         return 0
 
     def step_forward(self, steps: int) -> StepForwardReturn:
-        if self.is_at_end:
-            return (False, 1)
-        return (True, 0)
+        if self._is_at_final_time():
+            return StepForwardReturn(False, 1)
+        return StepForwardReturn(True, 0)
 
     def get_output_value(self, unit: int, output_number: int) -> GetOutputValueReturn:
-        if unit not in self.units:
-            return (math.nan, 1)
-        key = f"{unit}:{output_number}"
-        output_value = self.unit_outputs.get(key)
-        if output_value is None:
-            return (math.nan, 2)
-        return (output_value, 0)
+        if unit not in self._units:
+            return GetOutputValueReturn(math.nan, 1)
+        unit_outputs = self._units[unit].get("outputs", [])
+        index = output_number - 1
+        if index >= len(unit_outputs):
+            return GetOutputValueReturn(math.nan, 2)
+        value = unit_outputs[index]
+        return GetOutputValueReturn(value, 0)
 
     def set_input_value(self, unit: int, input_number: int, value: float) -> int:
-        if unit not in self.units:
+        if unit not in self._units:
             return 1
-        key = f"{unit}:{input_number}"
-        if key not in self.unit_inputs:
+        unit_inputs = self._units[unit].get("inputs", [])
+        index = input_number - 1
+        if index >= len(unit_inputs):
             return 2
-        self.unit_inputs[key] = value
+        unit_inputs[index] = value
         return 0
 
-    def add_unit_to_deck(self, unit: int):
-        """Make a unit be present in the deck."""
-        self.units.add(unit)
 
-    def set_unit_output_value(self, unit: int, output_number: int, value: float):
-        """Make a unit's output value be available."""
-        self.add_unit_to_deck(unit)
-        key = f"{unit}:{output_number}"
-        self.unit_outputs[key] = value
+def new_sim(*, lib_state: dict = {}):
+    """Create a new simulation with a mocked TrnsysLib.
 
-    def set_unit_input_value(self, unit: int, input_number: int, value: float):
-        """Make a unit's input value be available."""
-        self.add_unit_to_deck(unit)
-        key = f"{unit}:{input_number}"
-        self.unit_inputs[key] = value
-
-
-def new_sim():
-    """Create a new simulation with a mocked TrnsysLib."""
+    Args:
+        lib_state (dict, optional): If provided, passed directly to `MockTrnsysLib`.
+    """
     return Simulation(
-        MockTrnsysLib(),
+        MockTrnsysLib(**lib_state),
         TrnsysDirectories("", "", ""),
         Path(""),
     )
@@ -91,48 +115,44 @@ def test_track_lib_path_raises_duplicate_error_on_same_path():
 
 def test_stepping_after_final_time_raises_step_forward_error():
     sim = new_sim()
-
-    sim.lib.is_at_end = False
     sim.step_forward(1)  # not at end of simulation, so ok
 
-    sim.lib.is_at_end = True
+    sim = new_sim(lib_state={"current_time": 168, "final_time": 168})
     with pytest.raises(TrnsysStepForwardError):
         sim.step_forward(1)
 
 
 def test_getting_output_values():
-    sim = new_sim()
-
     # Unit not present in simulation
+    sim = new_sim()
     with pytest.raises(TrnsysGetOutputValueError) as err:
         sim.get_output_value(unit=23, output_number=5)
     assert err.value.error_code == 1
 
     # Unit now present but output number not available
-    sim.lib.set_unit_output_value(23, 1, 42)
+    sim = new_sim(lib_state={"units": {23: {"outputs": [1, 2]}}})
     with pytest.raises(TrnsysGetOutputValueError) as err:
-        sim.get_output_value(unit=23, output_number=5)
+        sim.get_output_value(unit=23, output_number=3)
     assert err.value.error_code == 2
 
     # Unit and output number now available
-    sim.lib.set_unit_output_value(23, 5, 10)
-    sim.get_output_value(unit=23, output_number=5)
+    sim = new_sim(lib_state={"units": {23: {"outputs": [1, 2, 3, 4, 5]}}})
+    value = sim.get_output_value(unit=23, output_number=5)
+    assert value == 5
 
 
 def test_setting_input_values():
-    sim = new_sim()
-
     # Unit not present in simulation
+    sim = new_sim()
     with pytest.raises(TrnsysSetInputValueError) as err:
-        sim.set_input_value(unit=92, input_number=10, value=42)
+        sim.set_input_value(unit=92, input_number=2, value=42)
     assert err.value.error_code == 1
 
     # Unit now present but input number not available
-    sim.lib.set_unit_input_value(92, 1, 42)
+    sim = new_sim(lib_state={"units": {23: {"inputs": [1, 2]}}})
     with pytest.raises(TrnsysSetInputValueError) as err:
-        sim.set_input_value(unit=92, input_number=10, value=42)
+        sim.set_input_value(unit=23, input_number=3, value=42)
     assert err.value.error_code == 2
 
     # Unit and input number now available
-    sim.lib.set_unit_input_value(92, 10, 0)
-    sim.set_input_value(unit=92, input_number=10, value=42)
+    sim = new_sim(lib_state={"units": {23: {"inputs": [1, 2, 3]}}})
