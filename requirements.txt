@@ -16,6 +16,6 @@ pygls==1.0.2
 pyproject_hooks==1.0.0
 pytest==7.3.2
 ruff==0.0.272
-ruff-lsp==0.0.33
+ruff-lsp==0.0.35
 typeguard==3.0.2
 typing_extensions==4.6.3
