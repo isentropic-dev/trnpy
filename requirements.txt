@@ -1,6 +1,6 @@
 -e .
 
 black
-pytest
+pytest=7.3.0
 build
 mypy
