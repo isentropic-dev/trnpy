@@ -5,7 +5,13 @@ import pytest
 
 
 from trnpy.trnsys.simulation import Simulation
-from trnpy.trnsys.lib import TrnsysLib, TrnsysDirectories, track_lib_path
+from trnpy.trnsys.lib import (
+    TrnsysLib,
+    TrnsysDirectories,
+    StepForwardReturn,
+    GetOutputValueReturn,
+    track_lib_path,
+)
 from trnpy.exceptions import (
     DuplicateLibraryError,
     TrnsysStepForwardError,
@@ -27,26 +33,26 @@ class MockTrnsysLib(TrnsysLib):
     def load_input_file(self, input_file: Path) -> int:
         return 0
 
-    def step_forward(self, steps: int) -> (bool, int):
+    def step_forward(self, steps: int) -> StepForwardReturn:
         if self.is_at_end:
             return (False, 1)
         return (True, 0)
 
-    def get_output_value(self, unit: int, output_number: int) -> (float, int):
+    def get_output_value(self, unit: int, output_number: int) -> GetOutputValueReturn:
         if unit not in self.units:
             return (math.nan, 1)
         key = f"{unit}:{output_number}"
-        value = self.unit_outputs.get(key)
-        if value is None:
-            return (math.nan, 2)  # output is not available for this unit
-        return (value, 0)
+        output_value = self.unit_outputs.get(key)
+        if output_value is None:
+            return (math.nan, 2)
+        return (output_value, 0)
 
     def set_input_value(self, unit: int, input_number: int, value: float) -> int:
         if unit not in self.units:
             return 1
         key = f"{unit}:{input_number}"
         if key not in self.unit_inputs:
-            return 2  # treat this is though unit does not have this input number
+            return 2
         self.unit_inputs[key] = value
         return 0
 
