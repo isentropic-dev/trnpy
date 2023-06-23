@@ -1,9 +1,12 @@
-"""Code related to running TRNSYS simulations."""
+"""Code related to the TRNSYS dynamic library."""
 
 import ctypes as ct
 import functools
+from collections import namedtuple
 from dataclasses import dataclass
 from pathlib import Path
+from typing import NamedTuple
+
 
 from ..exceptions import DuplicateLibraryError
 
@@ -17,6 +20,30 @@ class TrnsysDirectories:
     root: Path
     exe: Path
     user_lib: Path
+
+
+class StepForwardReturn(NamedTuple):
+    """The return value of `TrnsysLib.step_forward`.
+
+    Attributes:
+        done (bool): True if the simulation has reached its final time.
+        error (int): Error code reported by TRNSYS, with 0 indicating a successful call.
+    """
+
+    done: bool
+    error: int
+
+
+class GetOutputValueReturn(NamedTuple):
+    """The return value of `TrnsysLib.get_output_value`.
+
+    Attributes:
+        value (float): The output value reported by TRNSYS.
+        error (int): Error code reported by TRNSYS, with 0 indicating a successful call.
+    """
+
+    value: float
+    error: int
 
 
 def _track_lib_path(lib_path: Path, tracked_paths: set):
@@ -48,8 +75,7 @@ class TrnsysLib:
             dirs (TrnsysDirectories): The TRNSYS paths to set.
 
         Returns:
-            int: The error code reported by TRNSYS.
-                 A value of 0 indicates a successful call.
+            int: The error code reported by TRNSYS, with 0 indicating a successful call.
         """
         raise NotImplementedError
 
@@ -60,28 +86,22 @@ class TrnsysLib:
             input_file (Path): The TRNSYS input (deck) file to load.
 
         Returns:
-            int: The error code reported by TRNSYS.
-                 A value of 0 indicates a successful call.
+            int: The error code reported by TRNSYS, with 0 indicating a successful call.
         """
         raise NotImplementedError
 
-    def step_forward(self, steps: int) -> (bool, int):
+    def step_forward(self, steps: int) -> StepForwardReturn:
         """Step the simulation forward.
 
         Args:
             steps (int): The number of steps to take.
 
         Returns:
-            tuple: A tuple containing the following values:
-                - bool: Indicates whether the final time has been reached.
-                    - True if the simulation is done.
-                    - False if more steps can be taken.
-                - int: The error code reported by TRNSYS.
-                       A value of 0 indicates a successful call.
+            StepForwardReturn
         """
         raise NotImplementedError
 
-    def get_output_value(self, unit: int, output_number: int) -> (float, int):
+    def get_output_value(self, unit: int, output_number: int) -> GetOutputValueReturn:
         """Return the output value of a unit.
 
         Args:
@@ -89,10 +109,20 @@ class TrnsysLib:
             output_number (int): The output of interest.
 
         Returns:
-            tuple: A tuple containing the following values:
-                - float: The current output value.
-                - int: The error code reported by TRNSYS.
-                       A value of 0 indicates a successful call.
+            GetOutputValueReturn
+        """
+        raise NotImplementedError
+
+    def set_input_value(self, unit: int, input_number: int, value: float) -> int:
+        """Set an input value for a unit.
+
+        Args:
+            unit (int): The unit of interest.
+            input_number (int): The input of interest.
+            value (float): The input is set to this value.
+
+        Returns:
+            int: The error code reported by TRNSYS, with 0 indicating a successful call.
         """
         raise NotImplementedError
 
@@ -134,6 +164,12 @@ class LoadedTrnsysLib(TrnsysLib):
             ct.c_int,  # output number
             ct.POINTER(ct.c_int),  # error code (by reference)
         ]
+        self.lib.apiSetInputValue.argtypes = [
+            ct.c_int,  # unit number
+            ct.c_int,  # input number
+            ct.c_double,  # value to set
+            ct.POINTER(ct.c_int),  # error code (by reference)
+        ]
 
     def set_directories(self, dirs: TrnsysDirectories) -> int:
         """Set the TRNSYS directories in the library.
@@ -158,7 +194,7 @@ class LoadedTrnsysLib(TrnsysLib):
         self.lib.apiLoadInputFile(str(input_file).encode(), error)
         return error.value
 
-    def step_forward(self, steps: int) -> (bool, int):
+    def step_forward(self, steps: int) -> StepForwardReturn:
         """Step the simulation forward.
 
         Refer to the documentation of `TrnsysLib.step_forward` for more details.
@@ -167,7 +203,7 @@ class LoadedTrnsysLib(TrnsysLib):
         done = self.lib.apiStepForward(steps, error)
         return (done, error.value)
 
-    def get_output_value(self, unit: int, output_number: int) -> (float, int):
+    def get_output_value(self, unit: int, output_number: int) -> GetOutputValueReturn:
         """Return the output value of a unit.
 
         Refer to the documentation of `TrnsysLib.get_output_value` for more details.
@@ -175,3 +211,12 @@ class LoadedTrnsysLib(TrnsysLib):
         error = ct.c_int(0)
         value = self.lib.apiGetOutputValue(unit, output_number, error)
         return (value, error.value)
+
+    def set_input_value(self, unit: int, input_number: int, value: float) -> int:
+        """Set an input value for a unit.
+
+        Refer to the documentation of `TrnsysLib.set_input_value` for more details.
+        """
+        error = ct.c_int(0)
+        self.lib.apiSetInputValue(unit, input_number, value, error)
+        return error.value
