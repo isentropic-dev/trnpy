@@ -139,7 +139,7 @@ class LoadedTrnsysLib(TrnsysLib):
         """
         track_lib_path(lib_path)
 
-        self.lib = ct.CDLL(lib_path, ct.RTLD_GLOBAL)
+        self.lib = ct.CDLL(str(lib_path), ct.RTLD_GLOBAL)
         self.lib_path = lib_path
 
         # Define the function signatures
@@ -201,7 +201,7 @@ class LoadedTrnsysLib(TrnsysLib):
         """
         error = ct.c_int(0)
         done = self.lib.apiStepForward(steps, error)
-        return (done, error.value)
+        return StepForwardReturn(done, error.value)
 
     def get_output_value(self, unit: int, output_number: int) -> GetOutputValueReturn:
         """Return the output value of a unit.
@@ -210,7 +210,7 @@ class LoadedTrnsysLib(TrnsysLib):
         """
         error = ct.c_int(0)
         value = self.lib.apiGetOutputValue(unit, output_number, error)
-        return (value, error.value)
+        return GetOutputValueReturn(value, error.value)
 
     def set_input_value(self, unit: int, input_number: int, value: float) -> int:
         """Set an input value for a unit.
