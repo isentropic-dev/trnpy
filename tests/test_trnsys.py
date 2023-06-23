@@ -48,6 +48,7 @@ class MockTrnsysLib(TrnsysLib):
         if key not in self.unit_inputs:
             return 2  # treat this is though unit does not have this input number
         self.unit_inputs[key] = value
+        return 0
 
     def add_unit_to_deck(self, unit: int):
         """Make a unit be present in the deck."""
