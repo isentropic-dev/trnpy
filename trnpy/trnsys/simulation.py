@@ -88,7 +88,7 @@ class Simulation:
             - False if more steps can be taken.
 
         Raises:
-            ValueError: If `steps` is less than `1`.
+            ValueError: If `steps` is less than 1.
             TrnsysStepForwardError
         """
         if steps < 1:
@@ -104,8 +104,8 @@ class Simulation:
         """Return the current output value of a unit.
 
         Args:
-            unit: The unit of interest.
-            output_number: The output of interest.
+            unit (int): The unit of interest.
+            output_number (int): The output of interest.
 
         Returns:
             float: The current output value.
@@ -123,8 +123,8 @@ class Simulation:
         """Set an input value for a unit.
 
         Args:
-            unit: The unit of interest.
-            input_number: The input of interest.
+            unit (int): The unit of interest.
+            input_number (int): The input of interest.
             value (float): The input is set to this value.
 
         Raises:
