@@ -48,7 +48,6 @@ def _track_lib_path(lib_path: Path, tracked_paths: set):
     Raises:
         DuplicateLibraryError: If the file at `lib_path` is already in use.
     """
-
     if lib_path in tracked_paths:
         raise DuplicateLibraryError(f"The TRNSYS lib '{lib_path}' is already loaded")
     tracked_paths.add(lib_path)
