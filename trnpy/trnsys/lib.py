@@ -11,9 +11,7 @@ from ..exceptions import DuplicateLibraryError
 
 @dataclass
 class TrnsysDirectories:
-    """
-    Represents the directory paths required by TRNSYS.
-    """
+    """Represents the directory paths required by TRNSYS."""
 
     root: Path
     exe: Path
