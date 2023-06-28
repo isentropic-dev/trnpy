@@ -2,11 +2,9 @@
 
 import ctypes as ct
 import functools
-from collections import namedtuple
 from dataclasses import dataclass
 from pathlib import Path
 from typing import NamedTuple
-
 
 from ..exceptions import DuplicateLibraryError
 
