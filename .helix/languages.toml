@@ -6,6 +6,7 @@ auto-format = true
 configurationSources = ["flake8"]
 plugins.flake8.enabled = true
 plugins.pycodestyle.enabled = false
+plugins.pydocstyle.enabled = true
 plugins.mccabe.enabled = false
 plugins.pyflakes.enabled = false
 

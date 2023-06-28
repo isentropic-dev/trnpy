@@ -24,6 +24,9 @@ build-backend = "hatchling.build"
 [tool.isort]
 profile = "black"
 
+[tool.pydocstyle]
+convention = "google"
+
 [tool.pytest.ini_options]
 addopts = [
   "--import-mode=importlib",
