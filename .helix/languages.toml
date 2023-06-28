@@ -3,5 +3,5 @@ name = "python"
 auto-format = true
 
 [language.formatter]
-command = "black"
-args = ["--quiet", "-"]
+command = "sh"
+args = ["-c", "black --quiet - | isort -"]

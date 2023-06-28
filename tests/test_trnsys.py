@@ -3,21 +3,20 @@ from pathlib import Path
 
 import pytest
 
-
-from trnpy.trnsys.simulation import Simulation
-from trnpy.trnsys.lib import (
-    TrnsysLib,
-    TrnsysDirectories,
-    StepForwardReturn,
-    GetOutputValueReturn,
-    track_lib_path,
-)
 from trnpy.exceptions import (
     DuplicateLibraryError,
-    TrnsysStepForwardError,
     TrnsysGetOutputValueError,
     TrnsysSetInputValueError,
+    TrnsysStepForwardError,
 )
+from trnpy.trnsys.lib import (
+    GetOutputValueReturn,
+    StepForwardReturn,
+    TrnsysDirectories,
+    TrnsysLib,
+    track_lib_path,
+)
+from trnpy.trnsys.simulation import Simulation
 
 
 class MockTrnsysLib(TrnsysLib):
