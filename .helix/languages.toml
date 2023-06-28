@@ -3,5 +3,13 @@ name = "python"
 auto-format = true
 
 [language.formatter]
-command = "black"
-args = ["--quiet", "-"]
+command = "sh"
+args = ["-c", "black --quiet - | isort -"]
+
+[language-server.pylsp.config.pylsp]
+configurationSources = ["flake8"]
+plugins.flake8.enabled = true
+plugins.pycodestyle.enabled = false
+plugins.mccabe.enabled = false
+plugins.pyflakes.enabled = false
+plugins.pydocstyle = {"enabled" = true, "convention" = "google", "matchDir" = "trnpy|tests"}

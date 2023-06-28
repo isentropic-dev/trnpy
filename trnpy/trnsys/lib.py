@@ -2,20 +2,16 @@
 
 import ctypes as ct
 import functools
-from collections import namedtuple
 from dataclasses import dataclass
 from pathlib import Path
 from typing import NamedTuple
-
 
 from ..exceptions import DuplicateLibraryError
 
 
 @dataclass
 class TrnsysDirectories:
-    """
-    Represents the directory paths required by TRNSYS.
-    """
+    """Represents the directory paths required by TRNSYS."""
 
     root: Path
     exe: Path
@@ -52,7 +48,6 @@ def _track_lib_path(lib_path: Path, tracked_paths: set):
     Raises:
         DuplicateLibraryError: If the file at `lib_path` is already in use.
     """
-
     if lib_path in tracked_paths:
         raise DuplicateLibraryError(f"The TRNSYS lib '{lib_path}' is already loaded")
     tracked_paths.add(lib_path)
