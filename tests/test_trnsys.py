@@ -98,11 +98,10 @@ def new_sim(*, lib_state: dict = {}):
     Args:
         lib_state (dict, optional): If provided, passed directly to `MockTrnsysLib`.
     """
-    return Simulation(
-        MockTrnsysLib(**lib_state),
-        TrnsysDirectories("", "", ""),
-        Path(""),
-    )
+    lib = MockTrnsysLib(**lib_state)
+    dirs = TrnsysDirectories.from_single_path(Path(""))
+    input_file = Path("")
+    return Simulation(lib, dirs, input_file)
 
 
 def test_track_lib_path_raises_duplicate_error_on_same_path():
