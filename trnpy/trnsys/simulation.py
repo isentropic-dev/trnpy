@@ -19,8 +19,8 @@ class Simulation:
     @classmethod
     def new(
         cls,
-        trnsys_lib: str | os.PathLike,
-        input_file: str | os.PathLike,
+        trnsys_lib: str | os.PathLike[str],
+        input_file: str | os.PathLike[str],
     ) -> "Simulation":
         """Create a new TRNSYS simulation.
 
