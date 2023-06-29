@@ -2,6 +2,7 @@
 
 import os
 from pathlib import Path
+from typing import Union
 
 from ..exceptions import (
     TrnsysGetOutputValueError,
@@ -19,8 +20,8 @@ class Simulation:
     @classmethod
     def new(
         cls,
-        trnsys_lib: str | os.PathLike[str],
-        input_file: str | os.PathLike[str],
+        trnsys_lib: Union[str, os.PathLike[str]],
+        input_file: Union[str, os.PathLike[str]],
     ) -> "Simulation":
         """Create a new TRNSYS simulation.
 

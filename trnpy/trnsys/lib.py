@@ -4,7 +4,7 @@ import ctypes as ct
 import functools
 from dataclasses import dataclass
 from pathlib import Path
-from typing import NamedTuple
+from typing import NamedTuple, Set
 
 from ..exceptions import DuplicateLibraryError
 
@@ -51,7 +51,7 @@ class GetOutputValueReturn(NamedTuple):
     error: int
 
 
-def _track_lib_path(lib_path: Path, tracked_paths: set[Path]) -> None:
+def _track_lib_path(lib_path: Path, tracked_paths: Set[Path]) -> None:
     """Track TRNSYS lib file paths.
 
     Raises:

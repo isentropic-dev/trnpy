@@ -25,6 +25,7 @@ build-backend = "hatchling.build"
 profile = "black"
 
 [tool.mypy]
+python_version = 3.7
 strict = true
 
 [[tool.mypy.overrides]]
