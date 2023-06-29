@@ -17,6 +17,15 @@ class TrnsysDirectories:
     exe: Path
     user_lib: Path
 
+    @classmethod
+    def from_single_path(cls, path: Path) -> "TrnsysDirectories":
+        """Create a TrnsysDirectories instance from a single path.
+
+        Args:
+            path (Path): The path to use for all TRNSYS directories.
+        """
+        return cls(path, path, path)
+
 
 class StepForwardReturn(NamedTuple):
     """The return value of `TrnsysLib.step_forward`.
