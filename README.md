@@ -1,5 +1,7 @@
 # trnpy
 
+[![Build Status][test-badge]][main-test-workflow]
+
 ## Development
 
 When developing **trnpy**, it is recommended to set up a virtual environment.
@@ -42,3 +44,6 @@ pip install -r requirements.txt
 ```
 
 This will install all the required packages specified in the `requirements.txt` file into your virtual environment.
+
+[test-badge]: https://github.com/isentropic-dev/trnpy/actions/workflows/test.yml/badge.svg
+[main-test-workflow]: https://github.com/isentropic-dev/trnpy/actions/workflows/test.yml?query=branch%3Amain+
