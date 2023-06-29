@@ -1,8 +1,10 @@
 """Code related to running TRNSYS simulations."""
 
+from __future__ import annotations
+
 import os
 from pathlib import Path
-from typing import Union
+from typing import Any, Union
 
 from ..exceptions import (
     TrnsysGetOutputValueError,
@@ -20,8 +22,8 @@ class Simulation:
     @classmethod
     def new(
         cls,
-        trnsys_lib: Union[str, os.PathLike],
-        input_file: Union[str, os.PathLike],
+        trnsys_lib: Union[str, os.PathLike[Any]],
+        input_file: Union[str, os.PathLike[Any]],
     ) -> "Simulation":
         """Create a new TRNSYS simulation.
 
