@@ -19,8 +19,8 @@ class Simulation:
     @classmethod
     def new(
         cls,
-        trnsys_lib: str | os.PathLike,
-        input_file: str | os.PathLike,
+        trnsys_lib: str | os.PathLike[str],
+        input_file: str | os.PathLike[str],
     ) -> "Simulation":
         """Create a new TRNSYS simulation.
 
@@ -119,7 +119,7 @@ class Simulation:
 
         return value
 
-    def set_input_value(self, *, unit: int, input_number: int, value: float):
+    def set_input_value(self, *, unit: int, input_number: int, value: float) -> None:
         """Set an input value for a unit.
 
         Args:

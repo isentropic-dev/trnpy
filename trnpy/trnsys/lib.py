@@ -51,7 +51,7 @@ class GetOutputValueReturn(NamedTuple):
     error: int
 
 
-def _track_lib_path(lib_path: Path, tracked_paths: set):
+def _track_lib_path(lib_path: Path, tracked_paths: set[Path]) -> None:
     """Track TRNSYS lib file paths.
 
     Raises:
