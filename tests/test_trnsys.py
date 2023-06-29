@@ -1,7 +1,7 @@
 import math
 from dataclasses import dataclass, field
 from pathlib import Path
-from typing import Any, Optional
+from typing import Any, Dict, List, Optional
 
 import pytest
 
@@ -32,10 +32,10 @@ class UnitState:
         derivatives (list of floats): Current derivative values.
     """
 
-    parameters: list[float] = field(default_factory=list)
-    inputs: list[float] = field(default_factory=list)
-    outputs: list[float] = field(default_factory=list)
-    derivatives: list[float] = field(default_factory=list)
+    parameters: List[float] = field(default_factory=list)
+    inputs: List[float] = field(default_factory=list)
+    outputs: List[float] = field(default_factory=list)
+    derivatives: List[float] = field(default_factory=list)
 
 
 class MockTrnsysLib(TrnsysLib):
@@ -46,7 +46,7 @@ class MockTrnsysLib(TrnsysLib):
         final_time: float = 10,
         time_step: float = 1,
         current_time: float = 0,
-        units: Optional[dict[int, UnitState]] = None,
+        units: Optional[Dict[int, UnitState]] = None,
     ):
         """Create a new mocked TRNSYS library.
 
@@ -105,7 +105,7 @@ class MockTrnsysLib(TrnsysLib):
         return 0
 
 
-def new_sim(*, lib_state: Optional[dict[str, Any]] = None):
+def new_sim(*, lib_state: Optional[Dict[str, Any]] = None):
     """Create a new simulation with a mocked TrnsysLib.
 
     Args:

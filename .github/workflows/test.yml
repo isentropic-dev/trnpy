@@ -1,4 +1,4 @@
-name: Lint
+name: Test
 
 on:
   push:
@@ -14,10 +14,12 @@ permissions:
 
 jobs:
   main:
-    runs-on: ubuntu-latest
+    runs-on: ${{ matrix.os }}
     strategy:
+      fail-fast: false
       matrix:
-        python-version: ["3.11"]
+        python-version: ["3.7", "3.8", "3.9", "3.10", "3.11"]
+        os: ["ubuntu-latest", "macos-latest", "windows-latest"]
     steps:
       - name: Checkout
         uses: actions/checkout@v3
@@ -30,5 +32,6 @@ jobs:
         run: |
           pip install --upgrade pip
           pip install -r requirements.txt
-      - name: Lint
-        run: ./scripts/lint.sh
+      - name: Test
+        shell: bash
+        run: ./scripts/test.sh
