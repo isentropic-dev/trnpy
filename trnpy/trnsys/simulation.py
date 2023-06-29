@@ -119,7 +119,7 @@ class Simulation:
 
         return value
 
-    def set_input_value(self, *, unit: int, input_number: int, value: float):
+    def set_input_value(self, *, unit: int, input_number: int, value: float) -> None:
         """Set an input value for a unit.
 
         Args:
