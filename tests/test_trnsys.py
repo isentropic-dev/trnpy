@@ -31,7 +31,6 @@ class UnitState:
         outputs (list of floats): Current output values.
         derivatives (list of floats): Current derivative values.
     """
-
     parameters: List[float] = field(default_factory=list)
     inputs: List[float] = field(default_factory=list)
     outputs: List[float] = field(default_factory=list)
