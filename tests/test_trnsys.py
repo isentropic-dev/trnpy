@@ -76,7 +76,7 @@ class MockTrnsysLib(TrnsysLib):
     def set_directories(self, dirs: TrnsysDirectories) -> int:
         return 0
 
-    def load_input_file(self, input_file: Path) -> int:
+    def load_input_file(self, input_file: Path, type_lib_files: List[Path]) -> int:
         return 0
 
     def step_forward(self, steps: int) -> StepForwardReturn:
@@ -112,9 +112,10 @@ def new_sim(*, lib_state: Optional[Dict[str, Any]] = None):
         lib_state (dict, optional): If provided, passed directly to `MockTrnsysLib`.
     """
     lib = MockTrnsysLib(**(lib_state if lib_state else {}))
+    type_libs: List[Path] = []
     dirs = TrnsysDirectories.from_single_path(Path(""))
     input_file = Path("")
-    return Simulation(lib, dirs, input_file)
+    return Simulation(lib, type_libs, dirs, input_file)
 
 
 def test_track_lib_path_raises_duplicate_error_on_same_path():
