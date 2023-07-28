@@ -4,7 +4,7 @@ import ctypes as ct
 import functools
 from dataclasses import dataclass
 from pathlib import Path
-from typing import NamedTuple, Set
+from typing import List, NamedTuple, Set
 
 from ..exceptions import DuplicateLibraryError
 
@@ -83,11 +83,12 @@ class TrnsysLib:
         """
         raise NotImplementedError
 
-    def load_input_file(self, input_file: Path) -> int:
+    def load_input_file(self, input_file: Path, type_lib_files: List[Path]) -> int:
         """Load an input file.
 
         Args:
             input_file (Path): The TRNSYS input (deck) file to load.
+            type_lib_files (List[Path]): Type library files to load.
 
         Returns:
             int: The error code reported by TRNSYS, with 0 indicating a successful call.
@@ -155,6 +156,7 @@ class LoadedTrnsysLib(TrnsysLib):
         ]
         self.lib.apiLoadInputFile.argtypes = [
             ct.c_char_p,  # input file
+            ct.c_char_p,  # semicolon-separated list of type lib files
             ct.POINTER(ct.c_int),  # error code (by reference)
         ]
         self.lib.apiStepForward.restype = ct.c_bool
@@ -189,13 +191,17 @@ class LoadedTrnsysLib(TrnsysLib):
         )
         return error.value
 
-    def load_input_file(self, input_file: Path) -> int:
+    def load_input_file(self, input_file: Path, type_lib_files: List[Path]) -> int:
         """Load an input file.
 
         Refer to the documentation of `TrnsysLib.load_input_file` for more details.
         """
         error = ct.c_int(0)
-        self.lib.apiLoadInputFile(str(input_file).encode(), error)
+        self.lib.apiLoadInputFile(
+            str(input_file).encode(),
+            ";".join(str(x) for x in type_lib_files).encode(),
+            error,
+        )
         return error.value
 
     def step_forward(self, steps: int) -> StepForwardReturn:
