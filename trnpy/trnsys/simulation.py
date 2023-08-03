@@ -11,6 +11,7 @@ from ..exceptions import (
     TrnsysSetDirectoriesError,
     TrnsysSetInputValueError,
     TrnsysStepForwardError,
+    TrnsysError,
 )
 from .lib import LoadedTrnsysLib, TrnsysDirectories, TrnsysLib
 
