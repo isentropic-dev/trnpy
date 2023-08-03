@@ -114,6 +114,21 @@ class Simulation:
 
         return done
 
+    def get_current_time(self) -> float:
+        """Return the current time of the simulation.
+
+        Returns:
+            float: The current simulation time.
+
+        Raises:
+            TrnsysGetCurrentTimeError
+        """
+        (value, error_code) = self.lib.get_current_time()
+        if error_code:
+            raise TrnsysError
+
+        return value
+
     def get_output_value(self, *, unit: int, output_number: int) -> float:
         """Return the current output value of a unit.
 
