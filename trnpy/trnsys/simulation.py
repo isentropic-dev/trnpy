@@ -6,12 +6,12 @@ from pathlib import Path
 from typing import List, Union
 
 from ..exceptions import (
+    TrnsysError,
     TrnsysGetOutputValueError,
     TrnsysLoadInputFileError,
     TrnsysSetDirectoriesError,
     TrnsysSetInputValueError,
     TrnsysStepForwardError,
-    TrnsysError,
 )
 from .lib import LoadedTrnsysLib, TrnsysDirectories, TrnsysLib
 
