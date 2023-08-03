@@ -126,7 +126,7 @@ class Simulation:
         """
         (value, error_code) = self.lib.get_current_time()
         if error_code:
-            raise TrnsysError
+            raise TrnsysError(error_code)
 
         return value
 
