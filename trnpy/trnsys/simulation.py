@@ -6,7 +6,7 @@ from pathlib import Path
 from typing import List, Union
 
 from ..exceptions import (
-    TrnsysError,
+    SimulationNotInitializedError,
     TrnsysGetOutputValueError,
     TrnsysLoadInputFileError,
     TrnsysSetDirectoriesError,
@@ -122,11 +122,11 @@ class Simulation:
             float: The current simulation time.
 
         Raises:
-            TrnsysGetCurrentTimeError
+            SimulationNotInitializedError
         """
         (value, error_code) = self.lib.get_current_time()
         if error_code:
-            raise TrnsysError(error_code)
+            raise SimulationNotInitializedError
 
         return value
 
