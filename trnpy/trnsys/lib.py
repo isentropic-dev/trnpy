@@ -122,7 +122,7 @@ class TrnsysLib:
         """Return the current time of the simulation.
 
         Returns:
-            TrnsysError
+            SimulationNotInitializedError
         """
         raise NotImplementedError
 
