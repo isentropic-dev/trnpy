@@ -39,6 +39,18 @@ class StepForwardReturn(NamedTuple):
     error: int
 
 
+class GetCurrentTimeReturn(NamedTuple):
+    """The return value of `TrnsysLib.get_current_time`.
+
+    Attributes:
+        value (float): The current simulation time reported by TRNSYS.
+        error (int): Error code reported by TRNSYS, with 0 indicating a successful call.
+    """
+
+    value: float
+    error: int
+
+
 class GetOutputValueReturn(NamedTuple):
     """The return value of `TrnsysLib.get_output_value`.
 
@@ -106,6 +118,14 @@ class TrnsysLib:
         """
         raise NotImplementedError
 
+    def get_current_time(self) -> GetCurrentTimeReturn:
+        """Return the current time of the simulation.
+
+        Returns:
+            GetCurrentTimeReturn
+        """
+        raise NotImplementedError
+
     def get_output_value(self, unit: int, output_number: int) -> GetOutputValueReturn:
         """Return the output value of a unit.
 
@@ -164,6 +184,10 @@ class LoadedTrnsysLib(TrnsysLib):
             ct.c_int,  # number of steps
             ct.POINTER(ct.c_int),  # error code (by reference)
         ]
+        self.lib.apiGetCurrentTime.restype = ct.c_double
+        self.lib.apiGetCurrentTime.argtypes = [
+            ct.POINTER(ct.c_int),  # error code (by reference)
+        ]
         self.lib.apiGetOutputValue.restype = ct.c_double
         self.lib.apiGetOutputValue.argtypes = [
             ct.c_int,  # unit number
@@ -212,6 +236,15 @@ class LoadedTrnsysLib(TrnsysLib):
         error = ct.c_int(0)
         done = self.lib.apiStepForward(steps, error)
         return StepForwardReturn(done, error.value)
+
+    def get_current_time(self) -> GetCurrentTimeReturn:
+        """Return the current time of the simulation.
+
+        Refer to the documentation of `TrnsysLib.get_current_time` for more details.
+        """
+        error = ct.c_int(0)
+        value = self.lib.apiGetCurrentTime(error)
+        return GetCurrentTimeReturn(value, error.value)
 
     def get_output_value(self, unit: int, output_number: int) -> GetOutputValueReturn:
         """Return the output value of a unit.

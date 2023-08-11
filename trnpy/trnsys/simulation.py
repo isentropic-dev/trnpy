@@ -6,6 +6,7 @@ from pathlib import Path
 from typing import List, Union
 
 from ..exceptions import (
+    SimulationNotInitializedError,
     TrnsysGetOutputValueError,
     TrnsysLoadInputFileError,
     TrnsysSetDirectoriesError,
@@ -113,6 +114,21 @@ class Simulation:
             raise TrnsysStepForwardError(error_code)
 
         return done
+
+    def get_current_time(self) -> float:
+        """Return the current time of the simulation.
+
+        Returns:
+            float: The current simulation time.
+
+        Raises:
+            SimulationNotInitializedError
+        """
+        (value, error_code) = self.lib.get_current_time()
+        if error_code:
+            raise SimulationNotInitializedError
+
+        return value
 
     def get_output_value(self, *, unit: int, output_number: int) -> float:
         """Return the current output value of a unit.
