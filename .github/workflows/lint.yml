@@ -29,6 +29,6 @@ jobs:
       - name: Install dependencies
         run: |
           pip install --upgrade pip
-          pip install -r requirements.txt
+          pip install -e ".[lint,typing]"
       - name: Lint
         run: ./scripts/lint.sh

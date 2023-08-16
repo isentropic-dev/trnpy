@@ -40,7 +40,7 @@ You should see `(trnpy)` at the beginning of your command prompt, indicating tha
 4. With the virtual environment activated, you can now install the project requirements:
 
 ```
-pip install -r requirements.txt
+pip install -e ".[lint,test,typing]"
 ```
 
 This will install all the required packages specified in the `requirements.txt` file into your virtual environment.
