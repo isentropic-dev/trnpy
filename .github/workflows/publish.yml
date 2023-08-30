@@ -19,4 +19,4 @@ jobs:
       - name: Checkout
         uses: actions/checkout@v3
       - name: Build and inspect package 
-      - uses: hynek/build-and-inspect-python-package@v1
+        uses: hynek/build-and-inspect-python-package@v1
