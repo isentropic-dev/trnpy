@@ -6,7 +6,7 @@ on:
       - main
   pull_request:
     paths-ignore:
-    - '**/*.md'
+    - '**.md'
     - .gitignore
 
 permissions:

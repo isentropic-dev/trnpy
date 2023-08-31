@@ -1,6 +1,5 @@
 [project]
 name = "trnpy"
-version = "0.0.1"
 authors = [
   { name = "John Dyreby", email = "john@isentropic.dev" },
   { name = "Greg Troszak", email = "greg@isentropic.dev" },
@@ -13,6 +12,7 @@ classifiers = [
   "License :: OSI Approved :: MIT License",
   "Operating System :: OS Independent",
 ]
+dynamic = ["version"]
 
 [project.urls]
 "Homepage" = "https://github.com/isentropic-dev/trnpy"
@@ -28,8 +28,14 @@ test = ["coverage >= 7.2.7", "pytest == 7.4.0"]
 typing = ["mypy == 1.5.1"]
 
 [build-system]
-requires = ["hatchling"]
+requires = ["hatchling", "hatch-vcs"]
 build-backend = "hatchling.build"
+
+[tool.hatch.version]
+source = "vcs"
+
+[tool.hatch.version.raw-options]
+local_scheme = "no-local-version"
 
 [tool.isort]
 profile = "black"
