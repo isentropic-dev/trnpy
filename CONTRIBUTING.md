@@ -11,7 +11,7 @@
         $ git config --global user.name 'your name'
         $ git config --global user.email 'your email'
 
--   Fork trnpy to your GitHub account by clicking the `Fork`_ button.
+-   Fork TrnPy to your GitHub account by clicking the `Fork`_ button.
 -   `Clone`_ your fork locally, replacing ``your-username`` in the command below with
     your actual username.
 
