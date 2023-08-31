@@ -36,7 +36,7 @@
          > py -3 -m venv .venv --prompt trnpy
          > .venv\Scripts\activate
 
--   Install the development dependencies, then install Flask in editable mode.
+-   Install the development dependencies, then install TrnPy in editable mode.
 
     .. code-block:: text
 
