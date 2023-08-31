@@ -1,4 +1,4 @@
-# How to contribute to trnpy
+# How to contribute to TrnPy
 
 ### First time setup in your local environment
 
