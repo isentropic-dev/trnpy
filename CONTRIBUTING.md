@@ -2,25 +2,25 @@
 
 ### First time setup in your local environment
 
--   Make sure you have a [GitHub account][].
--   Download and install the [latest version of git][].
--   Configure git with your [username][] and [email][].
+- Make sure you have a [GitHub account][].
+- Download and install the [latest version of git][].
+- Configure git with your [username][] and [email][].
 
-    ```sh
-    $ git config --global user.name 'your name'
-    $ git config --global user.email 'your email'
+  ```sh
+  $ git config --global user.name 'your name'
+  $ git config --global user.email 'your email'
     ```
 
--   Fork TrnPy to your GitHub account by clicking the `Fork`_ button.
--   [Clone][] your fork locally, replacing ``your-username`` in the command below with
-    your actual username.
+- Fork TrnPy to your GitHub account by clicking the [Fork][] button.
+- [Clone][] your fork locally, replacing ``your-username`` in the command below
+  with your actual username.
 
-    ```sh
-    $ git clone https://github.com/your-username/trnpy
-    $ cd trnpy
-    ```
+  ```sh
+  $ git clone https://github.com/your-username/trnpy
+  $ cd trnpy
+  ```
 
--   Create a virtualenv. Use the latest version of Python.
+- Create a virtualenv. Use the latest version of Python.
 
     - Linux/macOS
 
@@ -36,12 +36,12 @@
       > .venv\Scripts\activate
       ```
 
--   Install the development dependencies, then install TrnPy in editable mode.
+- Install TrnPy in editable mode with development dependencies.
 
-    ```sh
-    $ python -m pip install -U pip
-    $ pip install -e ".[lint,test,typing]"
-    ```
+  ```sh
+  $ python -m pip install -U pip
+  $ pip install -e ".[lint,test,typing]"
+  ```
 
 [Github account]: https://github.com/join
 [latest version of git]: https://git-scm.com/downloads
