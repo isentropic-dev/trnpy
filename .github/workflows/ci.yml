@@ -1,4 +1,4 @@
-name: Test
+name: CI
 
 on:
   push:
@@ -13,7 +13,26 @@ permissions:
   contents: read
 
 jobs:
-  main:
+  lint:
+    runs-on: ubuntu-latest
+    strategy:
+      matrix:
+        python-version: ["3.11"]
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v3
+      - name: Setup Python ${{ matrix.python-version }}
+        uses: actions/setup-python@v4
+        with:
+          python-version: ${{ matrix.python-version }}
+          cache: 'pip'
+      - name: Install dependencies
+        run: |
+          pip install --upgrade pip
+          pip install -e ".[lint,test,typing]"
+      - name: Lint
+        run: ./scripts/lint.sh
+  test:
     runs-on: ${{ matrix.os }}
     strategy:
       fail-fast: false
