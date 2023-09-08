@@ -3,7 +3,7 @@ name: Publish
 on:
   workflow_run:
     workflows:
-      - Test
+      - CI
     types:
       - completed
     branches:
