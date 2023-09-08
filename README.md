@@ -1,4 +1,4 @@
-# trnpy
+# TrnPy
 
 [![Build Status][test-badge]][main-test-workflow]
 
