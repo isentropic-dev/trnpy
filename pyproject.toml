@@ -43,12 +43,7 @@ profile = "black"
 [tool.mypy]
 python_version = 3.7
 strict = true
-
-[[tool.mypy.overrides]]
-module = "tests.*"
-allow_untyped_defs = true
-allow_incomplete_defs = true
-allow_untyped_calls = true
+files = ["src/trnpy"]
 
 [tool.pydocstyle]
 convention = "google"
