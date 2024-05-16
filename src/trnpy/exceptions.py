@@ -1,6 +1,13 @@
 from typing import Optional
 
 
+class UnsupportedOperatingSystem(Exception):
+    """Raised if this operating system is not supported."""
+
+    def __init__(self, system: str):
+        super().__init__(f"The {system} operating system is not supported by TRNSYS.")
+
+
 class DuplicateLibraryError(Exception):
     """Raised when a library file has already been loaded."""
 

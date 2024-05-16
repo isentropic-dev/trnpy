@@ -2,29 +2,17 @@
 
 import ctypes as ct
 import functools
-from dataclasses import dataclass
+import json
+import platform
 from pathlib import Path
-from typing import List, NamedTuple, Set
+from typing import List, NamedTuple, Optional, Set
 
-from ..exceptions import DuplicateLibraryError
-
-
-@dataclass
-class TrnsysDirectories:
-    """Represents the directory paths required by TRNSYS."""
-
-    root: Path
-    exe: Path
-    user_lib: Path
-
-    @classmethod
-    def from_single_path(cls, path: Path) -> "TrnsysDirectories":
-        """Create a TrnsysDirectories instance from a single path.
-
-        Args:
-            path (Path): The path to use for all TRNSYS directories.
-        """
-        return cls(path, path, path)
+from ..exceptions import (
+    DuplicateLibraryError,
+    TrnsysLoadInputFileError,
+    TrnsysSetDirectoriesError,
+    UnsupportedOperatingSystem,
+)
 
 
 class StepForwardReturn(NamedTuple):
@@ -35,6 +23,20 @@ class StepForwardReturn(NamedTuple):
         error (int): Error code reported by TRNSYS, with 0 indicating a successful call.
     """
 
+    done: bool
+    error: int
+
+
+class StepForwardWithValuesReturn(NamedTuple):
+    """The return value of `TrnsysLib.step_forward_with_values`.
+
+    Attributes:
+        values (List[float]): The stored values after stepping forward.
+        done (bool): True if the simulation has reached its final time.
+        error (int): Error code reported by TRNSYS, with 0 indicating a successful call.
+    """
+
+    values: List[float]
     done: bool
     error: int
 
@@ -63,18 +65,16 @@ class GetOutputValueReturn(NamedTuple):
     error: int
 
 
-def _track_lib_path(lib_path: Path, tracked_paths: Set[Path]) -> None:
-    """Track TRNSYS lib file paths.
+class StoredValueInfo(NamedTuple):
+    """Information about a stored value.
 
-    Raises:
-        DuplicateLibraryError: If the file at `lib_path` is already in use.
+    Attributes:
+        id (str): The unique identifier for this stored value.
+        label (str): The label associated with this stored value.
     """
-    if lib_path in tracked_paths:
-        raise DuplicateLibraryError(f"The TRNSYS lib '{lib_path}' is already loaded")
-    tracked_paths.add(lib_path)
 
-
-track_lib_path = functools.partial(_track_lib_path, tracked_paths=set())
+    id: str
+    label: str
 
 
 class TrnsysLib:
@@ -84,26 +84,11 @@ class TrnsysLib:
     that is responsible for loading and wrapping a TRNSYS library file.
     """
 
-    def set_directories(self, dirs: TrnsysDirectories) -> int:
-        """Set the TRNSYS directories.
-
-        Args:
-            dirs (TrnsysDirectories): The TRNSYS paths to set.
+    def get_stored_values_info(self) -> List[StoredValueInfo]:
+        """Return information about the stored values in this simulation.
 
         Returns:
-            int: The error code reported by TRNSYS, with 0 indicating a successful call.
-        """
-        raise NotImplementedError
-
-    def load_input_file(self, input_file: Path, type_lib_files: List[Path]) -> int:
-        """Load an input file.
-
-        Args:
-            input_file (Path): The TRNSYS input (deck) file to load.
-            type_lib_files (List[Path]): Type library files to load.
-
-        Returns:
-            int: The error code reported by TRNSYS, with 0 indicating a successful call.
+            List[StoredValueInfo]
         """
         raise NotImplementedError
 
@@ -115,6 +100,17 @@ class TrnsysLib:
 
         Returns:
             StepForwardReturn
+        """
+        raise NotImplementedError
+
+    def step_forward_with_values(self, steps: int) -> StepForwardWithValuesReturn:
+        """Step the simulation forward and return stored values.
+
+        Args:
+            steps (int): The number of steps to take.
+
+        Returns:
+            StepForwardWithValuesReturn
         """
         raise NotImplementedError
 
@@ -153,80 +149,64 @@ class TrnsysLib:
 
 
 class LoadedTrnsysLib(TrnsysLib):
-    """Represents a TRNSYS library loaded in memory."""
+    """Represents a loaded TRNSYS library ready to run a simulation."""
 
-    def __init__(self, lib_path: Path):
+    def __init__(
+        self,
+        trnsys_dir: Path,
+        input_file: Path,
+        user_type_libs: Optional[List[Path]] = None,
+    ):
         """Initialize a LoadedTrnsysLib object.
 
         Raises:
-            DuplicateLibraryError: If the file at `lib_path` is already in use.
+            UnsupportedOperatingSystem: If the OS is supported by TRNSYS.
+            DuplicateLibraryError: If the libs in `trnsys_dir` are already in use.
             OSError: If an error occurs when loading the library.
         """
-        track_lib_path(lib_path)
+        lib = _load_api_lib(trnsys_dir)
 
-        self.lib = ct.CDLL(str(lib_path), ct.RTLD_GLOBAL)
-        self.lib_path = lib_path
-
-        # Define the function signatures
-        self.lib.apiSetDirectories.argtypes = [
-            ct.c_char_p,  # root dir
-            ct.c_char_p,  # exe dir
-            ct.c_char_p,  # user lib dir
-            ct.POINTER(ct.c_int),  # error code (by reference)
-        ]
-        self.lib.apiLoadInputFile.argtypes = [
-            ct.c_char_p,  # input file
-            ct.c_char_p,  # semicolon-separated list of type lib files
-            ct.POINTER(ct.c_int),  # error code (by reference)
-        ]
-        self.lib.apiStepForward.restype = ct.c_bool
-        self.lib.apiStepForward.argtypes = [
-            ct.c_int,  # number of steps
-            ct.POINTER(ct.c_int),  # error code (by reference)
-        ]
-        self.lib.apiGetCurrentTime.restype = ct.c_double
-        self.lib.apiGetCurrentTime.argtypes = [
-            ct.POINTER(ct.c_int),  # error code (by reference)
-        ]
-        self.lib.apiGetOutputValue.restype = ct.c_double
-        self.lib.apiGetOutputValue.argtypes = [
-            ct.c_int,  # unit number
-            ct.c_int,  # output number
-            ct.POINTER(ct.c_int),  # error code (by reference)
-        ]
-        self.lib.apiSetInputValue.argtypes = [
-            ct.c_int,  # unit number
-            ct.c_int,  # input number
-            ct.c_double,  # value to set
-            ct.POINTER(ct.c_int),  # error code (by reference)
-        ]
-
-    def set_directories(self, dirs: TrnsysDirectories) -> int:
-        """Set the TRNSYS directories in the library.
-
-        Refer to the documentation of `TrnsysLib.set_directories` for more details.
-        """
         error = ct.c_int(0)
-        self.lib.apiSetDirectories(
-            str(dirs.root).encode(),
-            str(dirs.exe).encode(),
-            str(dirs.user_lib).encode(),
+        lib.apiSetDirectories(
+            str(trnsys_dir).encode(),
+            str(trnsys_dir).encode(),
+            str(trnsys_dir).encode(),
             error,
         )
-        return error.value
+        if error.value:
+            raise TrnsysSetDirectoriesError(error.value)
 
-    def load_input_file(self, input_file: Path, type_lib_files: List[Path]) -> int:
-        """Load an input file.
+        standard_types_lib = trnsys_dir / _lib_filename("types")
+        type_libs = [] if user_type_libs is None else user_type_libs
+        type_libs.append(standard_types_lib)
 
-        Refer to the documentation of `TrnsysLib.load_input_file` for more details.
-        """
-        error = ct.c_int(0)
-        self.lib.apiLoadInputFile(
+        lib.apiLoadInputFile(
             str(input_file).encode(),
-            ";".join(str(x) for x in type_lib_files).encode(),
+            ";".join(str(x) for x in type_libs).encode(),
             error,
         )
-        return error.value
+        if error.value:
+            raise TrnsysLoadInputFileError(error.value)
+
+        stored_values_count = lib.apiGetStoredValuesCount()
+        self.stored_values_buffer = (ct.c_double * stored_values_count)()
+        self.lib = lib
+
+    def get_stored_values_info(self) -> List[StoredValueInfo]:
+        """Return information about the stored values in this simulation.
+
+        Refer to the documentation of `TrnsysLib.get_stored_values_info` for
+        more details.
+        """
+        stored_values_info_ptr = self.lib.apiGetStoredValuesInfo()
+        json_string = ct.cast(stored_values_info_ptr, ct.c_char_p).value
+        if json_string is None:
+            return []
+
+        stored_values_info: List[StoredValueInfo] = json.loads(
+            json_string.decode("utf-8")
+        )
+        return stored_values_info
 
     def step_forward(self, steps: int) -> StepForwardReturn:
         """Step the simulation forward.
@@ -236,6 +216,19 @@ class LoadedTrnsysLib(TrnsysLib):
         error = ct.c_int(0)
         done = self.lib.apiStepForward(steps, error)
         return StepForwardReturn(done, error.value)
+
+    def step_forward_with_values(self, steps: int) -> StepForwardWithValuesReturn:
+        """Step the simulation forward and return stored values.
+
+        Refer to the documentation of `TrnsysLib.step_forward_with_values` for
+        more details.
+        """
+        error = ct.c_int(0)
+        done = self.lib.apiStepForwardWithValues(
+            steps, self.stored_values_buffer, error
+        )
+        values = list(self.stored_values_buffer)
+        return StepForwardWithValuesReturn(values, done, error.value)
 
     def get_current_time(self) -> GetCurrentTimeReturn:
         """Return the current time of the simulation.
@@ -263,3 +256,95 @@ class LoadedTrnsysLib(TrnsysLib):
         error = ct.c_int(0)
         self.lib.apiSetInputValue(unit, input_number, value, error)
         return error.value
+
+
+def _load_api_lib(trnsys_dir: Path) -> ct.CDLL:
+    """Load the TRNSYS API library.
+
+    Raises:
+        UnsupportedOperatingSystem: If this OS is not supported by TRNSYS.
+        DuplicateLibraryError: If the libs in `trnsys_dir` are already in use.
+        OSError: If an error occurs when loading the dynamic library.
+    """
+    api_lib = _lib_filename("api")
+    lib_path = trnsys_dir / api_lib
+    track_lib_path(lib_path)
+
+    lib = ct.CDLL(str(lib_path), ct.RTLD_GLOBAL)
+
+    # Define the function signatures
+    lib.apiSetDirectories.argtypes = [
+        ct.c_char_p,  # root dir
+        ct.c_char_p,  # exe dir
+        ct.c_char_p,  # user lib dir
+        ct.POINTER(ct.c_int),  # error code (by reference)
+    ]
+    lib.apiLoadInputFile.argtypes = [
+        ct.c_char_p,  # input file
+        ct.c_char_p,  # semicolon-separated list of type lib files
+        ct.POINTER(ct.c_int),  # error code (by reference)
+    ]
+    lib.apiGetStoredValuesCount.restype = ct.c_int
+    lib.apiGetStoredValuesInfo.restype = ct.c_char_p
+    lib.apiStepForward.restype = ct.c_bool
+    lib.apiStepForward.argtypes = [
+        ct.c_int,  # number of steps
+        ct.POINTER(ct.c_int),  # error code (by reference)
+    ]
+    lib.apiStepForwardWithValues.restype = ct.c_bool
+    lib.apiStepForwardWithValues.argtypes = [
+        ct.c_int,  # number of steps
+        ct.POINTER(ct.c_double),  # start of stored values array
+        ct.POINTER(ct.c_int),  # error code (by reference)
+    ]
+    lib.apiGetCurrentTime.restype = ct.c_double
+    lib.apiGetCurrentTime.argtypes = [
+        ct.POINTER(ct.c_int),  # error code (by reference)
+    ]
+    lib.apiGetOutputValue.restype = ct.c_double
+    lib.apiGetOutputValue.argtypes = [
+        ct.c_int,  # unit number
+        ct.c_int,  # output number
+        ct.POINTER(ct.c_int),  # error code (by reference)
+    ]
+    lib.apiSetInputValue.argtypes = [
+        ct.c_int,  # unit number
+        ct.c_int,  # input number
+        ct.c_double,  # value to set
+        ct.POINTER(ct.c_int),  # error code (by reference)
+    ]
+
+    return lib
+
+
+def _lib_filename(name: str) -> str:
+    """Return the system-specific filename for a dynamic library.
+
+    Args:
+        name(str): The name of the dynamic library.
+
+    Raises:
+        UnsupportedOperatingSystem: If this OS is not supported by TRNSYS.
+    """
+    filename = {
+        "Windows": f"{name}.dll",
+        "Darwin": f"lib{name}.dylib",
+        "Linux": f"lib{name}.so",
+    }.get(platform.system())
+    if filename is None:
+        raise UnsupportedOperatingSystem(platform.system())
+    return filename
+
+
+def _track_lib_path(lib_path: Path, tracked_paths: Set[Path]) -> None:
+    """Track TRNSYS lib file paths.
+
+    Raises:
+        DuplicateLibraryError: If the file at `lib_path` is already in use.
+    """
+    if lib_path in tracked_paths:
+        raise DuplicateLibraryError(f"The TRNSYS lib '{lib_path}' is already loaded")
+    tracked_paths.add(lib_path)
+
+
+track_lib_path = functools.partial(_track_lib_path, tracked_paths=set())

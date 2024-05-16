@@ -14,7 +14,6 @@ from trnpy.exceptions import (
 from trnpy.trnsys.lib import (
     GetOutputValueReturn,
     StepForwardReturn,
-    TrnsysDirectories,
     TrnsysLib,
     track_lib_path,
 )
@@ -73,12 +72,6 @@ class MockTrnsysLib(TrnsysLib):
         """
         return abs(self._final_time - self._current_time) < 0.5 * self._time_step
 
-    def set_directories(self, dirs: TrnsysDirectories) -> int:
-        return 0
-
-    def load_input_file(self, input_file: Path, type_lib_files: List[Path]) -> int:
-        return 0
-
     def step_forward(self, steps: int) -> StepForwardReturn:
         if self._is_at_final_time():
             return StepForwardReturn(False, 1)
@@ -112,10 +105,7 @@ def new_sim(*, lib_state: Optional[Dict[str, Any]] = None):
         lib_state (dict, optional): If provided, passed directly to `MockTrnsysLib`.
     """
     lib = MockTrnsysLib(**(lib_state if lib_state else {}))
-    type_libs: List[Path] = []
-    dirs = TrnsysDirectories.from_single_path(Path(""))
-    input_file = Path("")
-    return Simulation(lib, type_libs, dirs, input_file)
+    return Simulation(lib)
 
 
 def test_track_lib_path_raises_duplicate_error_on_same_path():
