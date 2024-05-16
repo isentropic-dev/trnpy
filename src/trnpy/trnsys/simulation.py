@@ -118,7 +118,6 @@ class Simulation:
         Args:
             steps (int, optional): The number of steps to take.  Defaults to 1.
 
-
         Returns:
             StepForwardWithValuesReturn: A named tuple with the following fields:
                 - values (List[float]): The stored values after stepping forward.
