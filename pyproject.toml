@@ -6,7 +6,7 @@ authors = [
 ]
 description = "A Python wrapper for transient simulations."
 readme = "README.md"
-requires-python = ">=3.7"
+requires-python = ">=3.8"
 classifiers = [
   "Programming Language :: Python :: 3",
   "License :: OSI Approved :: MIT License",
@@ -41,7 +41,7 @@ local_scheme = "no-local-version"
 profile = "black"
 
 [tool.mypy]
-python_version = 3.7
+python_version = 3.8
 strict = true
 files = ["src/trnpy"]
 
