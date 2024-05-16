@@ -2,6 +2,7 @@
 
 import ctypes as ct
 import functools
+import json
 import platform
 from pathlib import Path
 from typing import List, NamedTuple, Optional, Set
@@ -87,7 +88,7 @@ class TrnsysLib:
         """Return information about the stored values in this simulation.
 
         Returns:
-            StoredValuesInfo
+            List[StoredValueInfo]
         """
         raise NotImplementedError
 
@@ -190,6 +191,22 @@ class LoadedTrnsysLib(TrnsysLib):
         stored_values_count = lib.apiGetStoredValuesCount()
         self.stored_values_buffer = (ct.c_double * stored_values_count)()
         self.lib = lib
+
+    def get_stored_values_info(self) -> List[StoredValueInfo]:
+        """Return information about the stored values in this simulation.
+
+        Refer to the documentation of `TrnsysLib.get_stored_values_info` for
+        more details.
+        """
+        stored_values_info_ptr = self.lib.apiGetStoredValuesInfo()
+        json_string = ct.cast(stored_values_info_ptr, ct.c_char_p).value
+        if json_string is None:
+            return []
+
+        stored_values_info: List[StoredValueInfo] = json.loads(
+            json_string.decode("utf-8")
+        )
+        return stored_values_info
 
     def step_forward(self, steps: int) -> StepForwardReturn:
         """Step the simulation forward.

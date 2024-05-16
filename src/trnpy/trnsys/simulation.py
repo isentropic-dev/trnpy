@@ -11,7 +11,7 @@ from ..exceptions import (
     TrnsysSetInputValueError,
     TrnsysStepForwardError,
 )
-from .lib import LoadedTrnsysLib, TrnsysLib
+from .lib import LoadedTrnsysLib, StoredValueInfo, TrnsysLib
 
 
 class Simulation:
@@ -65,6 +65,21 @@ class Simulation:
     def __init__(self, lib: TrnsysLib):
         """Initialize a Simulation object."""
         self.lib = lib
+
+    def get_stored_values_info(self) -> List[StoredValueInfo]:
+        """Return information about the stored values in this simulation.
+
+        The order of the returned list of `StoredValueInfo` named tuples
+        corresponds to the order of stored values returned when calling
+        `Simulation.step_forward_with_values`.
+
+        Returns:
+            List[StoredValueInfo]: A list of named tuples with the following fields:
+                - id (str): The unique identifier for this stored value.
+                - label (str): The label associated with this stored value.
+        """
+        stored_values_info = self.lib.get_stored_values_info()
+        return stored_values_info
 
     def step_forward(self, steps: int = 1) -> bool:
         """Step the simulation forward.
