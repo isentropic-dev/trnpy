@@ -130,6 +130,14 @@ class TrnsysLib:
         """
         raise NotImplementedError
 
+    def get_stop_time(self) -> GetFloatReturn:
+        """Return the stop time of the simulation.
+
+        Returns:
+            GetFloatReturn
+        """
+        raise NotImplementedError
+
     def get_output_value(self, unit: int, output_number: int) -> GetFloatReturn:
         """Return the output value of a unit.
 
@@ -256,6 +264,15 @@ class LoadedTrnsysLib(TrnsysLib):
         value = self.lib.apiGetStartTime(error)
         return GetFloatReturn(value, error.value)
 
+    def get_stop_time(self) -> GetFloatReturn:
+        """Return the stop time of the simulation.
+
+        Refer to the documentation of `TrnsysLib.get_stop_time` for more details.
+        """
+        error = ct.c_int(0)
+        value = self.lib.apiGetStopTime(error)
+        return GetFloatReturn(value, error.value)
+
     def get_output_value(self, unit: int, output_number: int) -> GetFloatReturn:
         """Return the output value of a unit.
 
@@ -338,6 +355,9 @@ def _load_api_lib(trnsys_dir: Path) -> ct.CDLL:
 
     lib.apiGetStartTime.restype = ct.c_double
     lib.apiGetStartTime.argtypes = [ct.POINTER(ct.c_int)]
+
+    lib.apiGetStopTime.restype = ct.c_double
+    lib.apiGetStopTime.argtypes = [ct.POINTER(ct.c_int)]
 
     return lib
 
