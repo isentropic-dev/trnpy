@@ -154,6 +154,14 @@ class TrnsysLib:
         """
         raise NotImplementedError
 
+    def get_total_steps(self) -> GetIntReturn:
+        """Return the total number of steps in the simulation.
+
+        Returns:
+            GetIntReturn
+        """
+        raise NotImplementedError
+
     def get_output_value(self, unit: int, output_number: int) -> GetFloatReturn:
         """Return the output value of a unit.
 
@@ -307,6 +315,15 @@ class LoadedTrnsysLib(TrnsysLib):
         value = self.lib.apiGetCurrentStep(error)
         return GetIntReturn(value, error.value)
 
+    def get_total_steps(self) -> GetIntReturn:
+        """Return the total number of steps in the simulation.
+
+        Refer to the documentation of `TrnsysLib.get_total_steps` for more details.
+        """
+        error = ct.c_int(0)
+        value = self.lib.apiGetTotalSteps(error)
+        return GetIntReturn(value, error.value)
+
     def get_output_value(self, unit: int, output_number: int) -> GetFloatReturn:
         """Return the output value of a unit.
 
@@ -398,6 +415,9 @@ def _load_api_lib(trnsys_dir: Path) -> ct.CDLL:
 
     lib.apiGetCurrentStep.restype = ct.c_int
     lib.apiGetCurrentStep.argtypes = [ct.POINTER(ct.c_int)]
+
+    lib.apiGetTotalSteps.restype = ct.c_int
+    lib.apiGetTotalSteps.argtypes = [ct.POINTER(ct.c_int)]
 
     return lib
 

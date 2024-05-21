@@ -210,6 +210,21 @@ class Simulation:
 
         return value
 
+    def get_total_steps(self) -> int:
+        """Return the total number of time steps in the simulation.
+
+        Returns:
+            int: The number of time steps in the simulation.
+
+        Raises:
+            SimulationNotInitializedError
+        """
+        (value, error_code) = self.lib.get_total_steps()
+        if error_code:
+            raise SimulationNotInitializedError
+
+        return value
+
     def get_output_value(self, *, unit: int, output_number: int) -> float:
         """Return the current output value of a unit.
 
