@@ -146,6 +146,14 @@ class TrnsysLib:
         """
         raise NotImplementedError
 
+    def get_current_step(self) -> GetIntReturn:
+        """Return the current step of the simulation.
+
+        Returns:
+            GetIntReturn
+        """
+        raise NotImplementedError
+
     def get_output_value(self, unit: int, output_number: int) -> GetFloatReturn:
         """Return the output value of a unit.
 
@@ -290,6 +298,15 @@ class LoadedTrnsysLib(TrnsysLib):
         value = self.lib.apiGetTimeStep(error)
         return GetFloatReturn(value, error.value)
 
+    def get_current_step(self) -> GetIntReturn:
+        """Return the current step of the simulation.
+
+        Refer to the documentation of `TrnsysLib.get_current_step` for more details.
+        """
+        error = ct.c_int(0)
+        value = self.lib.apiGetCurrentStep(error)
+        return GetIntReturn(value, error.value)
+
     def get_output_value(self, unit: int, output_number: int) -> GetFloatReturn:
         """Return the output value of a unit.
 
@@ -378,6 +395,9 @@ def _load_api_lib(trnsys_dir: Path) -> ct.CDLL:
 
     lib.apiGetTimeStep.restype = ct.c_double
     lib.apiGetTimeStep.argtypes = [ct.POINTER(ct.c_int)]
+
+    lib.apiGetCurrentStep.restype = ct.c_int
+    lib.apiGetCurrentStep.argtypes = [ct.POINTER(ct.c_int)]
 
     return lib
 
