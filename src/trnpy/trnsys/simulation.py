@@ -165,6 +165,21 @@ class Simulation:
 
         return value
 
+    def get_stop_time(self) -> float:
+        """Return the stop time of the simulation.
+
+        Returns:
+            float: The simulation stop time.
+
+        Raises:
+            SimulationNotInitializedError
+        """
+        (value, error_code) = self.lib.get_stop_time()
+        if error_code:
+            raise SimulationNotInitializedError
+
+        return value
+
     def get_output_value(self, *, unit: int, output_number: int) -> float:
         """Return the current output value of a unit.
 
