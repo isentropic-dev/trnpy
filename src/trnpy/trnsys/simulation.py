@@ -150,6 +150,21 @@ class Simulation:
 
         return value
 
+    def get_start_time(self) -> float:
+        """Return the start time of the simulation.
+
+        Returns:
+            float: The simulation start time.
+
+        Raises:
+            SimulationNotInitializedError
+        """
+        (value, error_code) = self.lib.get_start_time()
+        if error_code:
+            raise SimulationNotInitializedError
+
+        return value
+
     def get_output_value(self, *, unit: int, output_number: int) -> float:
         """Return the current output value of a unit.
 
