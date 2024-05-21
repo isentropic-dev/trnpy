@@ -195,7 +195,7 @@ class Simulation:
 
         return value
 
-    def get_current_step(self) -> float:
+    def get_current_step(self) -> int:
         """Return the current step of the simulation.
 
         Returns:
