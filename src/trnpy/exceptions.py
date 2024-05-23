@@ -16,14 +16,6 @@ class SimulationError(Exception):
     """Raised when a simulation reports a fatal error."""
 
 
-class SimulationNotInitializedError(Exception):
-    """Raised when a simulation has not been initialized.
-
-    This error occurs when functions that control or access
-    a simulation are called before it has been initialized.
-    """
-
-
 class TrnsysError(Exception):
     """Represents an error raised by TRNSYS."""
 
