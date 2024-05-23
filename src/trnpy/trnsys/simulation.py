@@ -6,7 +6,6 @@ from pathlib import Path
 from typing import List, NamedTuple, Optional, Union
 
 from ..exceptions import (
-    SimulationNotInitializedError,
     TrnsysGetOutputValueError,
     TrnsysSetInputValueError,
     TrnsysStepForwardError,
@@ -66,21 +65,6 @@ class Simulation:
         """Initialize a Simulation object."""
         self.lib = lib
 
-    def get_stored_values_info(self) -> List[StoredValueInfo]:
-        """Return information about the stored values in this simulation.
-
-        The order of the returned list of `StoredValueInfo` named tuples
-        corresponds to the order of stored values returned when calling
-        `Simulation.step_forward_with_values`.
-
-        Returns:
-            List[StoredValueInfo]: A list of named tuples with the following fields:
-                - id (str): The unique identifier for this stored value.
-                - label (str): The label associated with this stored value.
-        """
-        stored_values_info = self.lib.get_stored_values_info()
-        return stored_values_info
-
     def step_forward(self, steps: int = 1) -> bool:
         """Step the simulation forward.
 
@@ -135,96 +119,6 @@ class Simulation:
 
         return StepForwardWithValuesReturn(values, done)
 
-    def get_current_time(self) -> float:
-        """Return the current time of the simulation.
-
-        Returns:
-            float: The current simulation time.
-
-        Raises:
-            SimulationNotInitializedError
-        """
-        (value, error_code) = self.lib.get_current_time()
-        if error_code:
-            raise SimulationNotInitializedError
-
-        return value
-
-    def get_start_time(self) -> float:
-        """Return the start time of the simulation.
-
-        Returns:
-            float: The simulation start time.
-
-        Raises:
-            SimulationNotInitializedError
-        """
-        (value, error_code) = self.lib.get_start_time()
-        if error_code:
-            raise SimulationNotInitializedError
-
-        return value
-
-    def get_stop_time(self) -> float:
-        """Return the stop time of the simulation.
-
-        Returns:
-            float: The simulation stop time.
-
-        Raises:
-            SimulationNotInitializedError
-        """
-        (value, error_code) = self.lib.get_stop_time()
-        if error_code:
-            raise SimulationNotInitializedError
-
-        return value
-
-    def get_time_step(self) -> float:
-        """Return the time step of the simulation.
-
-        Returns:
-            float: The simulation time step.
-
-        Raises:
-            SimulationNotInitializedError
-        """
-        (value, error_code) = self.lib.get_time_step()
-        if error_code:
-            raise SimulationNotInitializedError
-
-        return value
-
-    def get_current_step(self) -> int:
-        """Return the current step of the simulation.
-
-        Returns:
-            int: The current simulation step.
-
-        Raises:
-            SimulationNotInitializedError
-        """
-        (value, error_code) = self.lib.get_current_step()
-        if error_code:
-            raise SimulationNotInitializedError
-
-        return value
-
-    def get_total_steps(self) -> int:
-        """Return the total number of time steps in the simulation.
-
-        Returns:
-            int: The number of time steps in the simulation.
-
-        Raises:
-            SimulationNotInitializedError
-        """
-        (value, error_code) = self.lib.get_total_steps()
-        if error_code:
-            raise SimulationNotInitializedError
-
-        return value
-
     def get_output_value(self, *, unit: int, output_number: int) -> float:
         """Return the current output value of a unit.
 
@@ -258,6 +152,46 @@ class Simulation:
         error_code = self.lib.set_input_value(unit, input_number, value)
         if error_code:
             raise TrnsysSetInputValueError(error_code)
+
+    @property
+    def stored_values_info(self) -> List[StoredValueInfo]:
+        """Information about the stored values in this simulation.
+
+        The order of the returned list of `StoredValueInfo` named tuples
+        corresponds to the order of stored values returned when calling
+        `Simulation.step_forward_with_values`.
+        """
+        return self.lib.get_stored_values_info()
+
+    @property
+    def current_time(self) -> float:
+        """The current time of the simulation."""
+        return self.lib.get_current_time().value
+
+    @property
+    def current_step(self) -> int:
+        """The current step of the simulation."""
+        return self.lib.get_current_step().value
+
+    @property
+    def start_time(self) -> float:
+        """The start time of the simulation."""
+        return self.lib.get_start_time().value
+
+    @property
+    def stop_time(self) -> float:
+        """The stop time of the simulation."""
+        return self.lib.get_stop_time().value
+
+    @property
+    def time_step(self) -> float:
+        """The time step of the simulation."""
+        return self.lib.get_time_step().value
+
+    @property
+    def total_steps(self) -> int:
+        """The total number of time steps in the simulation."""
+        return self.lib.get_total_steps().value
 
 
 class StepForwardWithValuesReturn(NamedTuple):
