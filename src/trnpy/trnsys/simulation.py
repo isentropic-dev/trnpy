@@ -180,6 +180,21 @@ class Simulation:
 
         return value
 
+    def get_time_step(self) -> float:
+        """Return the time step of the simulation.
+
+        Returns:
+            float: The simulation time step.
+
+        Raises:
+            SimulationNotInitializedError
+        """
+        (value, error_code) = self.lib.get_time_step()
+        if error_code:
+            raise SimulationNotInitializedError
+
+        return value
+
     def get_output_value(self, *, unit: int, output_number: int) -> float:
         """Return the current output value of a unit.
 
