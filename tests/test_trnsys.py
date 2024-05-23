@@ -12,7 +12,7 @@ from trnpy.exceptions import (
     TrnsysStepForwardError,
 )
 from trnpy.trnsys.lib import (
-    GetOutputValueReturn,
+    GetFloatReturn,
     StepForwardReturn,
     TrnsysLib,
     track_lib_path,
@@ -77,15 +77,15 @@ class MockTrnsysLib(TrnsysLib):
             return StepForwardReturn(False, 1)
         return StepForwardReturn(True, 0)
 
-    def get_output_value(self, unit: int, output_number: int) -> GetOutputValueReturn:
+    def get_output_value(self, unit: int, output_number: int) -> GetFloatReturn:
         if unit not in self._units:
-            return GetOutputValueReturn(math.nan, 1)
+            return GetFloatReturn(math.nan, 1)
         unit_outputs = self._units[unit].outputs
         index = output_number - 1
         if index >= len(unit_outputs):
-            return GetOutputValueReturn(math.nan, 2)
+            return GetFloatReturn(math.nan, 2)
         value = unit_outputs[index]
-        return GetOutputValueReturn(value, 0)
+        return GetFloatReturn(value, 0)
 
     def set_input_value(self, unit: int, input_number: int, value: float) -> int:
         if unit not in self._units:

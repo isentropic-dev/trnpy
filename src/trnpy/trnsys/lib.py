@@ -41,11 +41,11 @@ class StepForwardWithValuesReturn(NamedTuple):
     error: int
 
 
-class GetCurrentTimeReturn(NamedTuple):
-    """The return value of `TrnsysLib.get_current_time`.
+class GetFloatReturn(NamedTuple):
+    """The return value of a `TrnsysLib` function that returns a `float`.
 
     Attributes:
-        value (float): The current simulation time reported by TRNSYS.
+        value (float): The value returned by TRNSYS.
         error (int): Error code reported by TRNSYS, with 0 indicating a successful call.
     """
 
@@ -53,15 +53,15 @@ class GetCurrentTimeReturn(NamedTuple):
     error: int
 
 
-class GetOutputValueReturn(NamedTuple):
-    """The return value of `TrnsysLib.get_output_value`.
+class GetIntReturn(NamedTuple):
+    """The return value of a `TrnsysLib` function that returns an `int`.
 
     Attributes:
-        value (float): The output value reported by TRNSYS.
+        value (int): The value returned by TRNSYS.
         error (int): Error code reported by TRNSYS, with 0 indicating a successful call.
     """
 
-    value: float
+    value: int
     error: int
 
 
@@ -114,15 +114,23 @@ class TrnsysLib:
         """
         raise NotImplementedError
 
-    def get_current_time(self) -> GetCurrentTimeReturn:
+    def get_current_time(self) -> GetFloatReturn:
         """Return the current time of the simulation.
 
         Returns:
-            GetCurrentTimeReturn
+            GetFloatReturn
         """
         raise NotImplementedError
 
-    def get_output_value(self, unit: int, output_number: int) -> GetOutputValueReturn:
+    def get_start_time(self) -> GetFloatReturn:
+        """Return the start time of the simulation.
+
+        Returns:
+            GetFloatReturn
+        """
+        raise NotImplementedError
+
+    def get_output_value(self, unit: int, output_number: int) -> GetFloatReturn:
         """Return the output value of a unit.
 
         Args:
@@ -130,7 +138,7 @@ class TrnsysLib:
             output_number (int): The output of interest.
 
         Returns:
-            GetOutputValueReturn
+            GetFloatReturn
         """
         raise NotImplementedError
 
@@ -230,23 +238,32 @@ class LoadedTrnsysLib(TrnsysLib):
         values = list(self.stored_values_buffer)
         return StepForwardWithValuesReturn(values, done, error.value)
 
-    def get_current_time(self) -> GetCurrentTimeReturn:
+    def get_current_time(self) -> GetFloatReturn:
         """Return the current time of the simulation.
 
         Refer to the documentation of `TrnsysLib.get_current_time` for more details.
         """
         error = ct.c_int(0)
         value = self.lib.apiGetCurrentTime(error)
-        return GetCurrentTimeReturn(value, error.value)
+        return GetFloatReturn(value, error.value)
 
-    def get_output_value(self, unit: int, output_number: int) -> GetOutputValueReturn:
+    def get_start_time(self) -> GetFloatReturn:
+        """Return the start time of the simulation.
+
+        Refer to the documentation of `TrnsysLib.get_start_time` for more details.
+        """
+        error = ct.c_int(0)
+        value = self.lib.apiGetStartTime(error)
+        return GetFloatReturn(value, error.value)
+
+    def get_output_value(self, unit: int, output_number: int) -> GetFloatReturn:
         """Return the output value of a unit.
 
         Refer to the documentation of `TrnsysLib.get_output_value` for more details.
         """
         error = ct.c_int(0)
         value = self.lib.apiGetOutputValue(unit, output_number, error)
-        return GetOutputValueReturn(value, error.value)
+        return GetFloatReturn(value, error.value)
 
     def set_input_value(self, unit: int, input_number: int, value: float) -> int:
         """Set an input value for a unit.
@@ -279,40 +296,48 @@ def _load_api_lib(trnsys_dir: Path) -> ct.CDLL:
         ct.c_char_p,  # user lib dir
         ct.POINTER(ct.c_int),  # error code (by reference)
     ]
+
     lib.apiLoadInputFile.argtypes = [
         ct.c_char_p,  # input file
         ct.c_char_p,  # semicolon-separated list of type lib files
         ct.POINTER(ct.c_int),  # error code (by reference)
     ]
+
     lib.apiGetStoredValuesCount.restype = ct.c_int
     lib.apiGetStoredValuesInfo.restype = ct.c_char_p
+
     lib.apiStepForward.restype = ct.c_bool
     lib.apiStepForward.argtypes = [
         ct.c_int,  # number of steps
         ct.POINTER(ct.c_int),  # error code (by reference)
     ]
+
     lib.apiStepForwardWithValues.restype = ct.c_bool
     lib.apiStepForwardWithValues.argtypes = [
         ct.c_int,  # number of steps
         ct.POINTER(ct.c_double),  # start of stored values array
         ct.POINTER(ct.c_int),  # error code (by reference)
     ]
-    lib.apiGetCurrentTime.restype = ct.c_double
-    lib.apiGetCurrentTime.argtypes = [
-        ct.POINTER(ct.c_int),  # error code (by reference)
-    ]
+
     lib.apiGetOutputValue.restype = ct.c_double
     lib.apiGetOutputValue.argtypes = [
         ct.c_int,  # unit number
         ct.c_int,  # output number
         ct.POINTER(ct.c_int),  # error code (by reference)
     ]
+
     lib.apiSetInputValue.argtypes = [
         ct.c_int,  # unit number
         ct.c_int,  # input number
         ct.c_double,  # value to set
         ct.POINTER(ct.c_int),  # error code (by reference)
     ]
+
+    lib.apiGetCurrentTime.restype = ct.c_double
+    lib.apiGetCurrentTime.argtypes = [ct.POINTER(ct.c_int)]
+
+    lib.apiGetStartTime.restype = ct.c_double
+    lib.apiGetStartTime.argtypes = [ct.POINTER(ct.c_int)]
 
     return lib
 
