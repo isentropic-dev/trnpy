@@ -195,6 +195,21 @@ class Simulation:
 
         return value
 
+    def get_current_step(self) -> int:
+        """Return the current step of the simulation.
+
+        Returns:
+            int: The current simulation step.
+
+        Raises:
+            SimulationNotInitializedError
+        """
+        (value, error_code) = self.lib.get_current_step()
+        if error_code:
+            raise SimulationNotInitializedError
+
+        return value
+
     def get_output_value(self, *, unit: int, output_number: int) -> float:
         """Return the current output value of a unit.
 
