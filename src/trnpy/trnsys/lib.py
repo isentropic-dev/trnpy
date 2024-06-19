@@ -9,8 +9,7 @@ from typing import List, NamedTuple, Optional, Set
 
 from ..exceptions import (
     DuplicateLibraryError,
-    TrnsysLoadInputFileError,
-    TrnsysSetDirectoriesError,
+    TrnsysInitializeSimulationError,
     UnsupportedOperatingSystem,
 )
 
@@ -192,30 +191,19 @@ class LoadedTrnsysLib(TrnsysLib):
             DuplicateLibraryError: If the libs in `trnsys_dir` are already in use.
             OSError: If an error occurs when loading the library.
         """
+        config = {
+            "directories": {
+                "root": str(trnsys_dir),
+                "exe": str(trnsys_dir),
+                "resources": str(trnsys_dir),
+            },
+            "inputFile": str(input_file),
+            "typeFiles": [str(x) for x in user_type_libs or []],
+        }
         lib = _load_api_lib(trnsys_dir)
-
-        error = ct.c_int(0)
-        lib.apiSetDirectories(
-            str(trnsys_dir).encode(),
-            str(trnsys_dir).encode(),
-            str(trnsys_dir).encode(),
-            error,
-        )
-        if error.value:
-            raise TrnsysSetDirectoriesError(error.value)
-
-        standard_types_lib = trnsys_dir / _lib_filename("types")
-        type_libs = [] if user_type_libs is None else user_type_libs
-        type_libs.append(standard_types_lib)
-
-        lib.apiLoadInputFile(
-            str(input_file).encode(),
-            ";".join(str(x) for x in type_libs).encode(),
-            error,
-        )
-        if error.value:
-            raise TrnsysLoadInputFileError(error.value)
-
+        error_code = lib.apiInitializeSimulation(json.dumps(config).encode())
+        if error_code:
+            raise TrnsysInitializeSimulationError(error_code)
         stored_values_count = lib.apiGetStoredValuesCount()
         self.stored_values_buffer = (ct.c_double * stored_values_count)()
         self.lib = lib
@@ -334,18 +322,10 @@ def _load_api_lib(trnsys_dir: Path) -> ct.CDLL:
     lib = ct.CDLL(str(lib_path), ct.RTLD_GLOBAL)
 
     # Define the function signatures
-    lib.apiSetDirectories.argtypes = [
-        ct.c_char_p,  # root dir
-        ct.c_char_p,  # exe dir
-        ct.c_char_p,  # user lib dir
-        ct.POINTER(ct.c_int),  # error code (by reference)
+    lib.apiInitializeSimulation.argtypes = [
+        ct.c_char_p,  # the simulation config as a JSON-formatted string
     ]
-
-    lib.apiLoadInputFile.argtypes = [
-        ct.c_char_p,  # input file
-        ct.c_char_p,  # semicolon-separated list of type lib files
-        ct.POINTER(ct.c_int),  # error code (by reference)
-    ]
+    lib.apiInitializeSimulation.restype = ct.c_int
 
     lib.apiGetStoredValuesCount.restype = ct.c_int
     lib.apiGetStoredValuesInfo.restype = ct.c_char_p
