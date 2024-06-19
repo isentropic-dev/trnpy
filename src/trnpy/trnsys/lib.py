@@ -53,18 +53,6 @@ class GetFloatReturn(NamedTuple):
     error: int
 
 
-class GetIntReturn(NamedTuple):
-    """The return value of a `TrnsysLib` function that returns an `int`.
-
-    Attributes:
-        value (int): The value returned by TRNSYS.
-        error (int): Error code reported by TRNSYS, with 0 indicating a successful call.
-    """
-
-    value: int
-    error: int
-
-
 class StoredValueInfo(NamedTuple):
     """Information about a stored value.
 
@@ -114,51 +102,51 @@ class TrnsysLib:
         """
         raise NotImplementedError
 
-    def get_current_time(self) -> GetFloatReturn:
+    def get_current_time(self) -> float:
         """Return the current time of the simulation.
 
         Returns:
-            GetFloatReturn
+            float: The current time of the simulation.
         """
         raise NotImplementedError
 
-    def get_start_time(self) -> GetFloatReturn:
+    def get_start_time(self) -> float:
         """Return the start time of the simulation.
 
         Returns:
-            GetFloatReturn
+            float: The start time of the simulation.
         """
         raise NotImplementedError
 
-    def get_stop_time(self) -> GetFloatReturn:
+    def get_stop_time(self) -> float:
         """Return the stop time of the simulation.
 
         Returns:
-            GetFloatReturn
+            float: The stop time of the simulation.
         """
         raise NotImplementedError
 
-    def get_time_step(self) -> GetFloatReturn:
+    def get_time_step(self) -> float:
         """Return the time step of the simulation.
 
         Returns:
-            GetFloatReturn
+            float: The time step of the simulation.
         """
         raise NotImplementedError
 
-    def get_current_step(self) -> GetIntReturn:
+    def get_current_step(self) -> int:
         """Return the current step of the simulation.
 
         Returns:
-            GetIntReturn
+            int: The current step of the simulation.
         """
         raise NotImplementedError
 
-    def get_total_steps(self) -> GetIntReturn:
+    def get_total_steps(self) -> int:
         """Return the total number of steps in the simulation.
 
         Returns:
-            GetIntReturn
+            int: The total number of steps of the simulation.
         """
         raise NotImplementedError
 
@@ -270,59 +258,47 @@ class LoadedTrnsysLib(TrnsysLib):
         values = list(self.stored_values_buffer)
         return StepForwardWithValuesReturn(values, done, error.value)
 
-    def get_current_time(self) -> GetFloatReturn:
+    def get_current_time(self) -> float:
         """Return the current time of the simulation.
 
         Refer to the documentation of `TrnsysLib.get_current_time` for more details.
         """
-        error = ct.c_int(0)
-        value = self.lib.apiGetCurrentTime(error)
-        return GetFloatReturn(value, error.value)
+        return self.lib.apiGetCurrentTime()
 
-    def get_start_time(self) -> GetFloatReturn:
+    def get_start_time(self) -> float:
         """Return the start time of the simulation.
 
         Refer to the documentation of `TrnsysLib.get_start_time` for more details.
         """
-        error = ct.c_int(0)
-        value = self.lib.apiGetStartTime(error)
-        return GetFloatReturn(value, error.value)
+        return self.lib.apiGetStartTime()
 
-    def get_stop_time(self) -> GetFloatReturn:
+    def get_stop_time(self) -> float:
         """Return the stop time of the simulation.
 
         Refer to the documentation of `TrnsysLib.get_stop_time` for more details.
         """
-        error = ct.c_int(0)
-        value = self.lib.apiGetStopTime(error)
-        return GetFloatReturn(value, error.value)
+        return self.lib.apiGetStopTime()
 
-    def get_time_step(self) -> GetFloatReturn:
+    def get_time_step(self) -> float:
         """Return the time step of the simulation.
 
         Refer to the documentation of `TrnsysLib.get_time_step` for more details.
         """
-        error = ct.c_int(0)
-        value = self.lib.apiGetTimeStep(error)
-        return GetFloatReturn(value, error.value)
+        return self.lib.apiGetTimeStep()
 
-    def get_current_step(self) -> GetIntReturn:
+    def get_current_step(self) -> int:
         """Return the current step of the simulation.
 
         Refer to the documentation of `TrnsysLib.get_current_step` for more details.
         """
-        error = ct.c_int(0)
-        value = self.lib.apiGetCurrentStep(error)
-        return GetIntReturn(value, error.value)
+        return self.lib.apiGetCurrentStep()
 
-    def get_total_steps(self) -> GetIntReturn:
+    def get_total_steps(self) -> int:
         """Return the total number of steps in the simulation.
 
         Refer to the documentation of `TrnsysLib.get_total_steps` for more details.
         """
-        error = ct.c_int(0)
-        value = self.lib.apiGetTotalSteps(error)
-        return GetIntReturn(value, error.value)
+        return self.lib.apiGetTotalSteps()
 
     def get_output_value(self, unit: int, output_number: int) -> GetFloatReturn:
         """Return the output value of a unit.
@@ -402,22 +378,11 @@ def _load_api_lib(trnsys_dir: Path) -> ct.CDLL:
     ]
 
     lib.apiGetCurrentTime.restype = ct.c_double
-    lib.apiGetCurrentTime.argtypes = [ct.POINTER(ct.c_int)]
-
     lib.apiGetStartTime.restype = ct.c_double
-    lib.apiGetStartTime.argtypes = [ct.POINTER(ct.c_int)]
-
     lib.apiGetStopTime.restype = ct.c_double
-    lib.apiGetStopTime.argtypes = [ct.POINTER(ct.c_int)]
-
     lib.apiGetTimeStep.restype = ct.c_double
-    lib.apiGetTimeStep.argtypes = [ct.POINTER(ct.c_int)]
-
     lib.apiGetCurrentStep.restype = ct.c_int
-    lib.apiGetCurrentStep.argtypes = [ct.POINTER(ct.c_int)]
-
     lib.apiGetTotalSteps.restype = ct.c_int
-    lib.apiGetTotalSteps.argtypes = [ct.POINTER(ct.c_int)]
 
     return lib
 
