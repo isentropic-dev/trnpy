@@ -251,42 +251,42 @@ class LoadedTrnsysLib(TrnsysLib):
 
         Refer to the documentation of `TrnsysLib.get_current_time` for more details.
         """
-        return self.lib.apiGetCurrentTime()
+        return float(self.lib.apiGetCurrentTime())
 
     def get_start_time(self) -> float:
         """Return the start time of the simulation.
 
         Refer to the documentation of `TrnsysLib.get_start_time` for more details.
         """
-        return self.lib.apiGetStartTime()
+        return float(self.lib.apiGetStartTime())
 
     def get_stop_time(self) -> float:
         """Return the stop time of the simulation.
 
         Refer to the documentation of `TrnsysLib.get_stop_time` for more details.
         """
-        return self.lib.apiGetStopTime()
+        return float(self.lib.apiGetStopTime())
 
     def get_time_step(self) -> float:
         """Return the time step of the simulation.
 
         Refer to the documentation of `TrnsysLib.get_time_step` for more details.
         """
-        return self.lib.apiGetTimeStep()
+        return int(self.lib.apiGetTimeStep())
 
     def get_current_step(self) -> int:
         """Return the current step of the simulation.
 
         Refer to the documentation of `TrnsysLib.get_current_step` for more details.
         """
-        return self.lib.apiGetCurrentStep()
+        return int(self.lib.apiGetCurrentStep())
 
     def get_total_steps(self) -> int:
         """Return the total number of steps in the simulation.
 
         Refer to the documentation of `TrnsysLib.get_total_steps` for more details.
         """
-        return self.lib.apiGetTotalSteps()
+        return int(self.lib.apiGetTotalSteps())
 
     def get_output_value(self, unit: int, output_number: int) -> GetFloatReturn:
         """Return the output value of a unit.
