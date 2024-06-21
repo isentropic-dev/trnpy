@@ -166,32 +166,32 @@ class Simulation:
     @property
     def current_time(self) -> float:
         """The current time of the simulation."""
-        return self.lib.get_current_time().value
+        return self.lib.get_current_time()
 
     @property
     def current_step(self) -> int:
         """The current step of the simulation."""
-        return self.lib.get_current_step().value
+        return self.lib.get_current_step()
 
     @property
     def start_time(self) -> float:
         """The start time of the simulation."""
-        return self.lib.get_start_time().value
+        return self.lib.get_start_time()
 
     @property
     def stop_time(self) -> float:
         """The stop time of the simulation."""
-        return self.lib.get_stop_time().value
+        return self.lib.get_stop_time()
 
     @property
     def time_step(self) -> float:
         """The time step of the simulation."""
-        return self.lib.get_time_step().value
+        return self.lib.get_time_step()
 
     @property
     def total_steps(self) -> int:
         """The total number of time steps in the simulation."""
-        return self.lib.get_total_steps().value
+        return self.lib.get_total_steps()
 
 
 class StepForwardWithValuesReturn(NamedTuple):
