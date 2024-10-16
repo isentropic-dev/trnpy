@@ -28,7 +28,7 @@ jobs:
       artifact-name: ${{ steps.build-python.outputs.artifact-name }}
     steps:
       - name: Checkout
-        uses: actions/checkout@v3
+        uses: actions/checkout@v4
         with:
           # Fetch all tags.
           fetch-depth: 0
