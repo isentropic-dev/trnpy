@@ -40,23 +40,23 @@ class Simulation:
                 print(f"Current value for output 1 of unit 7 is {value}")
 
         Args:
-            trnsys_dir: Path to the TRNSYS directory.
-            input_file: Path to the simulation's input (deck) file.
-            user_type_libs: Optional list of paths to user Type libs.
+            trnsys_dir: Path to the TRNSYS directory. Must exist.
+            input_file: Path to the simulation's input (deck) file. Must exist.
+            user_type_libs: Optional list of paths to user Type libs. All must exist.
 
         Raises:
-            FileNotFoundError: If the TRNSYS library or input file does not exist.
+            FileNotFoundError: If any provided path does not exist.
             DuplicateLibraryError: The lib in `trnsys_dir` is already in use.
             OSError: An error occurred loading the lib from `trnsys_dir`.
             TrnsysSetDirectoriesError
             TrnsysLoadInputFileError
         """
-        trnsys_dir = Path(trnsys_dir)
-        input_file = Path(input_file)
+        trnsys_dir = Path(trnsys_dir).resolve(strict=True)
+        input_file = Path(input_file).resolve(strict=True)
         type_libs = (
             []
             if user_type_libs is None
-            else [Path(lib_file) for lib_file in user_type_libs]
+            else [Path(lib_file).resolve(strict=True) for lib_file in user_type_libs]
         )
         lib = LoadedTrnsysLib(trnsys_dir, input_file, type_libs)
         return cls(lib)
